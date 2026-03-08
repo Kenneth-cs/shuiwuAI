@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+venv/
+.venv/
+env/
+
+# 环境变量（含 API Key，严禁提交）
+.env
+backend/.env
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 日志
+*.log
+nohup.out
+
+# IDE
+.vscode/
+.idea/
+
+# 临时文件
+*.swp
+*.tmp
