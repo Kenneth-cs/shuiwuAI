@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: shuiwuai-api
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: VOLCENGINE_API_KEY
+        sync: false   # 在 Render 控制台手动填入，不写入代码
+      - key: VOLCENGINE_MODEL
+        value: doubao-seed-2-0-pro-260215

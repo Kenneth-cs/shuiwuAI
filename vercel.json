@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "buildCommand": null,
+  "outputDirectory": ".",
+  "routes": [
+    { "src": "/申报工具箱",   "dest": "/申报工具箱.html" },
+    { "src": "/辅助报税",     "dest": "/辅助报税.html" },
+    { "src": "/",             "dest": "/index.html" }
+  ]
+}
