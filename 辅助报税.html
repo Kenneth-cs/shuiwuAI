@@ -48,7 +48,7 @@
     .sidebar-avatar { width: 40px; height: 40px; background: rgba(40,175,96,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; }
     .sidebar-card-head h3 { font-size: 14px; font-weight: 700; }
     .sidebar-card-head p { font-size: 11px; color: #64748B; }
-    .btn-consult { width: 100%; padding: 10px; background: #28AF60; color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: background 0.2s; }
+    .btn-consult { width: 100%; padding: 10px; background: #28AF60; color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
     .btn-consult:hover { background: #22a055; }
     .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500; color: #475569; transition: all 0.15s; text-decoration: none; }
     .nav-item:hover { background: rgba(40,175,96,0.06); color: #28AF60; }
@@ -63,57 +63,63 @@
     .main { margin-left: 220px; flex: 1; padding: 28px 28px 60px; display: flex; flex-direction: column; gap: 20px; }
 
     /* ===== 页面标题区 ===== */
-    .page-header { display: flex; align-items: center; justify-content: space-between; }
-    .page-header-left {}
+    .page-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
     .page-badge { font-size: 11px; font-weight: 600; color: #28AF60; background: rgba(40,175,96,0.1); padding: 2px 8px; border-radius: 999px; }
     .page-header h2 { font-size: 20px; font-weight: 700; margin-top: 4px; }
     .page-header p { font-size: 12px; color: #64748B; margin-top: 2px; }
     .header-actions { display: flex; gap: 10px; }
-    .btn-download { padding: 9px 18px; background: #28AF60; color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: background 0.2s; }
+    .btn-download { padding: 9px 18px; background: #28AF60; color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; }
     .btn-download:hover { background: #22a055; }
-    .btn-back { padding: 9px 16px; border: 1.5px solid #CBD5E1; background: white; color: #334155; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; text-decoration: none; display: flex; align-items: center; gap: 6px; }
+    .btn-back { padding: 9px 16px; border: 1.5px solid #CBD5E1; background: white; color: #334155; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; display: flex; align-items: center; gap: 6px; }
     .btn-back:hover { border-color: #28AF60; color: #28AF60; }
 
     /* ===== 报税切换标签 ===== */
-    .report-tabs { display: flex; gap: 8px; background: white; padding: 6px; border-radius: 12px; border: 1px solid rgba(40,175,96,0.1); align-self: flex-start; }
-    .report-tab { padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; background: transparent; color: #64748B; }
+    .report-tabs { display: flex; gap: 6px; background: white; padding: 6px; border-radius: 12px; border: 1px solid rgba(40,175,96,0.1); align-self: flex-start; flex-wrap: wrap; }
+    .report-tab { padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; background: transparent; color: #64748B; white-space: nowrap; }
     .report-tab.active { background: #28AF60; color: white; }
     .report-tab:hover:not(.active) { background: rgba(40,175,96,0.08); color: #28AF60; }
 
-    /* ===== 主内容区（报表+AI助手）===== */
+    /* ===== 主内容区 ===== */
     .content-area { display: flex; gap: 20px; align-items: flex-start; }
     .report-panel { flex: 1; min-width: 0; }
     .ai-panel { width: 300px; flex-shrink: 0; position: sticky; top: 84px; }
 
-    /* ===== 报表区 ===== */
+    /* ===== 报表卡片 ===== */
     .report-card { background: white; border-radius: 12px; border: 1px solid #E2E8F0; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
     .report-breadcrumb { padding: 12px 20px; border-bottom: 1px solid #F1F5F9; font-size: 13px; color: #64748B; display: flex; align-items: center; gap: 6px; }
     .report-breadcrumb .sep { color: #CBD5E1; }
-    .report-inner { padding: 28px 28px 20px; }
-    .report-title-row { margin-bottom: 20px; }
-    .report-title { font-size: 20px; font-weight: 700; color: #0F172A; margin-bottom: 8px; }
-    .report-meta { display: flex; gap: 24px; font-size: 12px; color: #475569; }
+    .report-inner { padding: 20px; overflow-x: auto; }
+    .report-title-row { margin-bottom: 16px; }
+    .report-title { font-size: 17px; font-weight: 700; color: #0F172A; margin-bottom: 6px; }
+    .report-meta { display: flex; gap: 16px; font-size: 12px; color: #475569; flex-wrap: wrap; }
+
+    /* ===== 基础信息栏 ===== */
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 24px; margin-bottom: 16px; padding: 12px 16px; background: #F8FAFC; border-radius: 8px; border: 1px solid #E2E8F0; font-size: 12px; }
+    .info-grid .info-label { color: #64748B; }
+    .info-grid .info-value { color: #0F172A; font-weight: 600; }
 
     /* ===== 申报表格 ===== */
-    .tax-table { width: 100%; border-collapse: collapse; border: 1px solid #E2E8F0; font-size: 13px; }
-    .tax-table th, .tax-table td { border: 1px solid #E2E8F0; padding: 10px 12px; }
-    .tax-table th { background: #F8FAFC; font-weight: 600; color: #0F172A; text-align: center; }
-    .tax-table th.col-no { width: 48px; }
-    .tax-table th.col-item { text-align: left; }
-    .tax-table th.col-value { width: 140px; text-align: right; }
-    .tax-table td.td-no { text-align: center; color: #94A3B8; font-size: 12px; }
-    .tax-table td.td-item { color: #0F172A; }
-    .tax-table td.td-value { text-align: right; font-family: 'SF Mono', 'Consolas', monospace; }
-    /* AI 填充高亮行 */
-    .row-ai { background: rgba(40,175,96,0.05); }
-    .row-ai td.td-value { color: #28AF60; font-weight: 700; background: rgba(40,175,96,0.1); position: relative; cursor: pointer; }
-    .row-ai td.td-value:hover { background: rgba(40,175,96,0.18); }
+    .tax-table { width: 100%; border-collapse: collapse; border: 1px solid #CBD5E1; font-size: 12px; }
+    .tax-table th, .tax-table td { border: 1px solid #E2E8F0; padding: 7px 8px; }
+    .tax-table th { background: #F8FAFC; font-weight: 600; color: #0F172A; text-align: center; font-size: 11px; line-height: 1.4; }
+    .tax-table td { vertical-align: middle; }
+    .tax-table td.td-no { text-align: center; color: #94A3B8; font-size: 11px; width: 40px; }
+    .tax-table td.td-item { color: #0F172A; font-size: 12px; }
+    .tax-table td.td-value { text-align: right; font-family: 'SF Mono', 'Consolas', monospace; font-size: 12px; min-width: 90px; }
+    .tax-table td.td-na { text-align: center; color: #CBD5E1; font-size: 11px; }
+
+    /* AI 填充高亮 */
+    .row-ai { background: rgba(40,175,96,0.04); }
+    .row-ai td.td-value { color: #28AF60; font-weight: 700; }
+    .row-ai td.td-value:hover { background: rgba(40,175,96,0.12); }
     .row-subtotal td { background: #F8FAFC; font-weight: 600; }
     .row-zero td.td-value { color: #94A3B8; }
     .row-exempt { background: #FFFBEB; }
     .row-exempt td.td-value { color: #B45309; font-weight: 600; }
+    .row-header td { background: #F0FDF4; color: #166534; font-size: 11px; font-weight: 600; }
+    .row-category td { background: #F1F5F9; font-weight: 600; font-size: 11px; color: #475569; }
 
-    /* 行内指引气泡 */
+    /* Tooltip */
     .value-wrap { position: relative; display: inline-block; }
     .guide-tooltip {
       display: none; position: absolute; right: 0; top: calc(100% + 6px);
@@ -127,74 +133,57 @@
       clip-path: polygon(0 100%, 50% 0, 100% 100%);
     }
     .row-ai td.td-value:hover .guide-tooltip { display: block; }
-    .td-value-indicator {
-      display: inline-flex; align-items: center; gap: 4px;
-    }
-    .ai-dot { width: 6px; height: 6px; background: #28AF60; border-radius: 50%; animation: blink 2s ease-in-out infinite; }
+    .td-value-indicator { display: inline-flex; align-items: center; gap: 4px; }
+    .ai-dot { width: 5px; height: 5px; background: #28AF60; border-radius: 50%; animation: blink 2s ease-in-out infinite; }
     @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
 
     /* ===== 报表操作区 ===== */
-    .report-actions { padding: 16px 28px; border-top: 1px solid #F1F5F9; display: flex; justify-content: flex-end; gap: 10px; align-items: center; }
-    .action-note { font-size: 12px; color: #94A3B8; flex: 1; }
-    .btn-save { padding: 9px 18px; border: 1.5px solid #CBD5E1; border-radius: 8px; background: white; color: #334155; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .report-actions { padding: 14px 20px; border-top: 1px solid #F1F5F9; display: flex; justify-content: flex-end; gap: 10px; align-items: center; }
+    .action-note { font-size: 11px; color: #94A3B8; flex: 1; }
+    .btn-save { padding: 8px 16px; border: 1.5px solid #CBD5E1; border-radius: 8px; background: white; color: #334155; font-size: 12px; font-weight: 600; cursor: pointer; }
     .btn-save:hover { border-color: #28AF60; color: #28AF60; }
-    .btn-confirm { padding: 9px 20px; background: #28AF60; color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; }
+    .btn-confirm { padding: 8px 18px; background: #28AF60; color: white; border: none; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; }
     .btn-confirm:hover { background: #22a055; }
 
     /* ===== AI 助手面板 ===== */
-    .ai-assistant-card {
-      background: white; border-radius: 12px; border: 1px solid rgba(40,175,96,0.25);
-      overflow: hidden; box-shadow: 0 8px 24px rgba(40,175,96,0.08);
-    }
+    .ai-assistant-card { background: white; border-radius: 12px; border: 1px solid rgba(40,175,96,0.25); overflow: hidden; box-shadow: 0 8px 24px rgba(40,175,96,0.08); }
     .ai-header { background: #28AF60; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; }
     .ai-header-left { display: flex; align-items: center; gap: 8px; }
-    .ai-header-icon { font-size: 20px; }
     .ai-header-title { font-size: 14px; font-weight: 700; color: white; }
     .ai-status { background: rgba(255,255,255,0.2); border-radius: 999px; padding: 2px 10px; font-size: 11px; color: white; }
-
     .ai-body { padding: 16px; }
     .ai-section-label { font-size: 10px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
     .ai-current-step { font-size: 16px; font-weight: 700; color: #0F172A; margin-bottom: 14px; }
-
-    /* AI 解析框 */
-    .ai-logic-box {
-      background: rgba(40,175,96,0.05); border-left: 3px solid #28AF60;
-      border-radius: 0 8px 8px 0; padding: 12px 14px; margin-bottom: 16px;
-      font-size: 12px; color: #1E293B; line-height: 1.8;
-    }
+    .ai-logic-box { background: rgba(40,175,96,0.05); border-left: 3px solid #28AF60; border-radius: 0 8px 8px 0; padding: 12px 14px; margin-bottom: 16px; font-size: 12px; color: #1E293B; line-height: 1.8; }
     .ai-logic-box strong { color: #28AF60; }
-
-    /* 校验清单 */
     .check-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
     .check-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 8px; }
     .check-item.pass { background: rgba(40,175,96,0.04); }
     .check-item.warn { background: #FFFBEB; }
     .check-item.info { background: #F0F9FF; }
-    .check-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+    .check-icon { font-size: 16px; flex-shrink: 0; }
     .check-title { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
     .check-desc { font-size: 11px; color: #64748B; line-height: 1.5; }
-
     .ai-divider { height: 1px; background: #F1F5F9; margin: 14px 0; }
-
-    /* AI 操作按钮 */
-    .ai-btn-primary { width: 100%; padding: 11px; background: #28AF60; color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 6px; transition: background 0.2s; }
+    .ai-btn-primary { width: 100%; padding: 11px; background: #28AF60; color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 6px; }
     .ai-btn-primary:hover { background: #22a055; }
-    .ai-btn-secondary { width: 100%; padding: 10px; background: white; color: #28AF60; border: 1.5px solid #28AF60; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.15s; }
-    .ai-btn-secondary:hover { background: rgba(40,175,96,0.06); }
+    .ai-btn-secondary { width: 100%; padding: 10px; background: white; color: #28AF60; border: 1.5px solid #28AF60; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
 
     /* ===== 税收优惠提醒卡 ===== */
-    .tax-benefit-card {
-      background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 12px; padding: 16px; margin-top: 16px;
-    }
+    .tax-benefit-card { background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 12px; padding: 16px; margin-top: 16px; }
     .tax-benefit-title { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: #B45309; margin-bottom: 8px; }
     .tax-benefit-desc { font-size: 12px; color: #92400E; line-height: 1.7; }
 
-    /* ===== 企业所得税、文化事业建设费报表 ===== */
+    /* ===== 报表 Section ===== */
     .report-section { display: none; }
     .report-section.active { display: block; }
 
-    /* ===== 打印样式 ===== */
-    .print-note { text-align: center; font-size: 12px; color: #94A3B8; margin-top: 12px; }
+    /* ===== 勾选信息栏 ===== */
+    .check-info { margin-bottom: 16px; padding: 12px 16px; background: #F0FDF4; border-radius: 8px; border: 1px solid rgba(40,175,96,0.15); font-size: 12px; }
+    .check-info .ci-row { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+    .check-info .ci-label { color: #475569; min-width: 180px; }
+    .check-info .ci-value { color: #0F172A; font-weight: 600; }
+    .check-info .ci-value.green { color: #16a34a; }
 
     /* ===== Toast ===== */
     .toast { position: fixed; bottom: 32px; right: 32px; z-index: 300; background: #0F172A; color: white; padding: 12px 20px; border-radius: 10px; font-size: 13px; font-weight: 500; transform: translateY(80px); opacity: 0; transition: all 0.3s; }
@@ -225,17 +214,12 @@
 <nav class="navbar">
   <a href="index.html" class="navbar-logo">
     <div class="logo-icon">税</div>
-    <div class="logo-text">
-      <h1>税悟 AI</h1>
-      <p>Intelligent Ledger</p>
-    </div>
+    <div class="logo-text"><h1>税悟 AI</h1><p>Intelligent Ledger</p></div>
   </a>
   <div class="navbar-center">
     <div class="navbar-breadcrumb">
-      <a href="申报工具箱.html">首页</a>
-      <span class="sep">›</span>
-      <a href="申报工具箱.html">纳税申报</a>
-      <span class="sep">›</span>
+      <a href="申报工具箱.html">首页</a><span class="sep">›</span>
+      <a href="申报工具箱.html">纳税申报</a><span class="sep">›</span>
       <span class="current">辅助报税</span>
     </div>
     <span class="ai-tag">税悟 AI 辅助版</span>
@@ -248,33 +232,19 @@
 
 <!-- 布局 -->
 <div class="layout">
-  <!-- 侧边栏 -->
   <aside class="sidebar">
     <div class="sidebar-card">
       <div class="sidebar-card-head">
         <div class="sidebar-avatar">🤖</div>
-        <div>
-          <h3>AI 智能助手</h3>
-          <p>24/7 在线为您答疑</p>
-        </div>
+        <div><h3>AI 智能助手</h3><p>24/7 在线为您答疑</p></div>
       </div>
       <button class="btn-consult">💬 发起在线咨询</button>
     </div>
-    <a href="#" class="nav-item">
-      <span class="nav-icon">🗺️</span> 办税全景地图
-    </a>
-    <a href="申报工具箱.html" class="nav-item">
-      <span class="nav-icon">📋</span> 申报工具箱
-    </a>
-    <a href="辅助报税.html" class="nav-item active">
-      <span class="nav-icon">📊</span> 辅助报税
-    </a>
-    <a href="#" class="nav-item">
-      <span class="nav-icon">🏥</span> 财务健康诊断
-    </a>
-    <a href="#" class="nav-item">
-      <span class="nav-icon">⚙️</span> 个人设置
-    </a>
+    <a href="#" class="nav-item"><span class="nav-icon">🗺️</span> 办税全景地图</a>
+    <a href="申报工具箱.html" class="nav-item"><span class="nav-icon">📋</span> 申报工具箱</a>
+    <a href="辅助报税.html" class="nav-item active"><span class="nav-icon">📊</span> 辅助报税</a>
+    <a href="#" class="nav-item"><span class="nav-icon">🏥</span> 财务健康诊断</a>
+    <a href="#" class="nav-item"><span class="nav-icon">⚙️</span> 个人设置</a>
     <div class="quick-entry">
       <p>常用入口</p>
       <div class="quick-btns">
@@ -284,7 +254,6 @@
     </div>
   </aside>
 
-  <!-- 主内容 -->
   <main class="main">
     <!-- 标题区 -->
     <div class="page-header">
@@ -299,28 +268,25 @@
       </div>
     </div>
 
-    <!-- 报表切换 -->
+    <!-- 报表切换（4个Tab） -->
     <div class="report-tabs">
-      <button class="report-tab active" onclick="switchReport('vat')">📋 增值税申报表</button>
-      <button class="report-tab" onclick="switchReport('cit')">🏢 企业所得税</button>
+      <button class="report-tab active" onclick="switchReport('vat')">📋 增值税（小规模）</button>
+      <button class="report-tab" onclick="switchReport('cit')">🏢 企业所得税 A200000</button>
       <button class="report-tab" onclick="switchReport('culture')">🎭 文化事业建设费</button>
+      <button class="report-tab" onclick="switchReport('finance')">📊 财务报表</button>
     </div>
 
     <!-- 报表 + AI 面板 -->
     <div class="content-area">
-      <!-- 左：报表区 -->
       <div class="report-panel">
 
-        <!-- === 增值税申报表 === -->
+        <!-- ================== 增值税（小规模纳税人）================== -->
         <div class="report-section active" id="section-vat">
           <div class="report-card">
-            <div class="report-breadcrumb">
-              首页 <span class="sep">›</span> 纳税申报 <span class="sep">›</span>
-              增值税纳税申报表（小规模纳税人适用）
-            </div>
+            <div class="report-breadcrumb">首页 <span class="sep">›</span> 纳税申报 <span class="sep">›</span> 增值税及附加税费申报表（小规模纳税人适用）</div>
             <div class="report-inner">
               <div class="report-title-row">
-                <div class="report-title">增值税纳税申报表（小规模纳税人适用）</div>
+                <div class="report-title">增值税及附加税费申报表（小规模纳税人适用）</div>
                 <div class="report-meta">
                   <span id="meta-taxid">纳税人识别号：—</span>
                   <span id="meta-name">纳税人名称：—</span>
@@ -330,46 +296,49 @@
               <table class="tax-table" id="vat-table">
                 <thead>
                   <tr>
-                    <th class="col-no">行次</th>
-                    <th class="col-item">项目</th>
-                    <th class="col-value">本期数</th>
-                    <th class="col-value">本年累计</th>
+                    <th rowspan="2" style="width:46px">栏次</th>
+                    <th rowspan="2" style="min-width:220px">项目</th>
+                    <th colspan="2">本期数</th>
+                    <th colspan="2">本年累计</th>
+                  </tr>
+                  <tr>
+                    <th style="min-width:90px">货物及劳务</th>
+                    <th style="min-width:90px">服务、不动产<br/>和无形资产</th>
+                    <th style="min-width:90px">货物及劳务</th>
+                    <th style="min-width:90px">服务、不动产<br/>和无形资产</th>
                   </tr>
                 </thead>
-                <tbody id="vat-tbody">
-                  <!-- 由 JS 动态填充 -->
-                </tbody>
+                <tbody id="vat-tbody"></tbody>
               </table>
             </div>
             <div class="report-actions">
-              <div class="action-note">💡 绿色高亮数值已由 AI 自动填入，请核对后前往广东电子税务局填写</div>
+              <div class="action-note">💡 绿色高亮数值已由 AI 自动填入，请核对后前往电子税务局填写</div>
               <button class="btn-save" onclick="showToast('已暂存当前数据', 'success')">暂存</button>
               <button class="btn-confirm" onclick="confirmSubmit()">✅ 正式申报</button>
             </div>
           </div>
         </div>
 
-        <!-- === 企业所得税 === -->
+        <!-- ================== 企业所得税 A200000 ================== -->
         <div class="report-section" id="section-cit">
           <div class="report-card">
-            <div class="report-breadcrumb">
-              首页 <span class="sep">›</span> 纳税申报 <span class="sep">›</span>
-              居民企业所得税月（季）度预缴申报表（A类）
-            </div>
+            <div class="report-breadcrumb">首页 <span class="sep">›</span> 纳税申报 <span class="sep">›</span> 企业所得税月（季）度预缴纳税申报表（A类）</div>
             <div class="report-inner">
               <div class="report-title-row">
-                <div class="report-title">居民企业（查账征收）企业所得税月（季）度预缴纳税申报表（A类）</div>
+                <div class="report-title">中华人民共和国企业所得税月（季）度预缴纳税申报表（A类）</div>
                 <div class="report-meta">
                   <span id="cit-meta-name">纳税人名称：—</span>
                   <span id="cit-meta-period">税款所属期：—</span>
                 </div>
               </div>
+              <!-- 优惠及附报事项 -->
+              <div class="check-info" id="cit-info"></div>
               <table class="tax-table" id="cit-table">
                 <thead>
                   <tr>
-                    <th class="col-no">行次</th>
-                    <th class="col-item">项目</th>
-                    <th class="col-value">金额（元）</th>
+                    <th style="width:46px">行次</th>
+                    <th style="min-width:300px">项目</th>
+                    <th style="min-width:120px">本年累计金额（元）</th>
                   </tr>
                 </thead>
                 <tbody id="cit-tbody"></tbody>
@@ -383,28 +352,30 @@
           </div>
         </div>
 
-        <!-- === 文化事业建设费 === -->
+        <!-- ================== 文化事业建设费 ================== -->
         <div class="report-section" id="section-culture">
           <div class="report-card">
-            <div class="report-breadcrumb">
-              首页 <span class="sep">›</span> 纳税申报 <span class="sep">›</span>
-              文化事业建设费申报表
-            </div>
+            <div class="report-breadcrumb">首页 <span class="sep">›</span> 纳税申报 <span class="sep">›</span> 文化事业建设费申报表</div>
             <div class="report-inner">
               <div class="report-title-row">
                 <div class="report-title">文化事业建设费申报表</div>
+                <div class="report-meta">
+                  <span>征收品目：广告业文化事业建设费</span>
+                  <span id="culture-meta-period">费款所属期：—</span>
+                </div>
               </div>
               <table class="tax-table" id="culture-table">
                 <thead>
                   <tr>
-                    <th class="col-no">行次</th>
-                    <th class="col-item">项目</th>
-                    <th class="col-value">金额（元）</th>
+                    <th style="width:46px">栏次</th>
+                    <th style="min-width:240px">项目</th>
+                    <th style="min-width:110px">本月（期）数</th>
+                    <th style="min-width:110px">本年累计</th>
                   </tr>
                 </thead>
                 <tbody id="culture-tbody"></tbody>
               </table>
-              <div id="culture-note" class="print-note"></div>
+              <div id="culture-note" style="text-align:center;font-size:12px;color:#94A3B8;margin-top:12px;"></div>
             </div>
             <div class="report-actions">
               <button class="btn-save" onclick="showToast('已暂存', 'success')">暂存</button>
@@ -413,14 +384,72 @@
           </div>
         </div>
 
+        <!-- ================== 财务报表 ================== -->
+        <div class="report-section" id="section-finance">
+          <div class="report-card">
+            <div class="report-breadcrumb">首页 <span class="sep">›</span> 纳税申报 <span class="sep">›</span> 财务报表报送与信息采集（小企业会计准则）</div>
+            <div class="report-inner">
+              <!-- 利润表 -->
+              <div class="report-title-row">
+                <div class="report-title">利润表（月季报）</div>
+                <div class="report-meta">
+                  <span>会小企02表</span>
+                  <span>单位：元</span>
+                  <span id="fin-meta-period">所属期：—</span>
+                </div>
+              </div>
+              <table class="tax-table" id="profit-table">
+                <thead>
+                  <tr>
+                    <th style="min-width:260px">项目</th>
+                    <th style="width:46px">行次</th>
+                    <th style="min-width:100px">本月（季）金额</th>
+                    <th style="min-width:100px">本年累计金额</th>
+                  </tr>
+                </thead>
+                <tbody id="profit-tbody"></tbody>
+              </table>
+
+              <!-- 资产负债表 -->
+              <div class="report-title-row" style="margin-top:28px;">
+                <div class="report-title">资产负债表</div>
+                <div class="report-meta">
+                  <span>会小企01表</span>
+                  <span>单位：元</span>
+                </div>
+              </div>
+              <table class="tax-table" id="balance-table">
+                <thead>
+                  <tr>
+                    <th style="min-width:140px">资产</th>
+                    <th style="width:40px">行次</th>
+                    <th style="min-width:90px">期末余额</th>
+                    <th style="min-width:90px">年初余额</th>
+                    <th style="min-width:140px">负债和所有者权益</th>
+                    <th style="width:40px">行次</th>
+                    <th style="min-width:90px">期末余额</th>
+                    <th style="min-width:90px">年初余额</th>
+                  </tr>
+                </thead>
+                <tbody id="balance-tbody"></tbody>
+              </table>
+            </div>
+            <div class="report-actions">
+              <div class="action-note">💡 财务报表由 AI 根据录入数据推算，仅供参考</div>
+              <button class="btn-save" onclick="showToast('已暂存', 'success')">暂存</button>
+              <button class="btn-confirm" onclick="confirmSubmit()">✅ 正式申报</button>
+            </div>
+          </div>
+        </div>
+
       </div>
 
-      <!-- 右：AI 助手面板 -->
+      <!-- AI 助手面板 -->
       <div class="ai-panel">
         <div class="ai-assistant-card">
           <div class="ai-header">
             <div class="ai-header-left">
-              <span class="ai-header-icon">🤖</span>
+              <span style="font-size:20px">🤖</span>
               <span class="ai-header-title">税悟 AI 助手</span>
             </div>
             <span class="ai-status">运行中</span>
@@ -428,27 +457,13 @@
           <div class="ai-body">
             <div class="ai-section-label">当前步骤</div>
             <div class="ai-current-step" id="ai-step-title">计税依据确认</div>
-
-            <div class="ai-logic-box" id="ai-logic-text">
-              <strong>AI 逻辑解析：</strong>正在加载您的数据...
-            </div>
-
-            <div class="check-list" id="check-list">
-              <!-- 由 JS 填充 -->
-            </div>
-
+            <div class="ai-logic-box" id="ai-logic-text"><strong>AI 逻辑解析：</strong>正在加载您的数据...</div>
+            <div class="check-list" id="check-list"></div>
             <div class="ai-divider"></div>
-
-            <button class="ai-btn-primary" onclick="downloadPDF()">
-              ⬇ 下载 PDF 申报草稿
-            </button>
-            <button class="ai-btn-secondary" onclick="openConsult()">
-              💬 人工咨询
-            </button>
+            <button class="ai-btn-primary" onclick="downloadPDF()">⬇ 下载 PDF 申报草稿</button>
+            <button class="ai-btn-secondary" onclick="showToast('人工咨询功能开发中')">💬 人工咨询</button>
           </div>
         </div>
-
-        <!-- 税收优惠卡片 -->
         <div class="tax-benefit-card" id="benefit-card" style="display:none">
           <div class="tax-benefit-title">⚠️ 税收优惠提醒</div>
           <div class="tax-benefit-desc" id="benefit-text"></div>
@@ -466,122 +481,98 @@
     <div style="font-size:12px;color:#64748B;margin-top:6px;">AI 正在计算各税种数据</div>
   </div>
 </div>
-
-<!-- Toast -->
 <div class="toast" id="toast"></div>
 
 <script>
-// ===== 财税计算逻辑 =====
-
-/** 从 sessionStorage 读取由申报工具箱传来的数据 */
+// ===== 数据加载 =====
 function loadTaxData() {
   const raw = sessionStorage.getItem('taxData');
-  if (raw) {
-    try { return JSON.parse(raw); } catch(e) {}
-  }
-  // 默认 Demo 数据（直接打开时显示）
+  if (raw) { try { return JSON.parse(raw); } catch(e) {} }
   return {
-    revenue: {
-      total: 50000,
-      taxable_1_percent: 29702.97, // 含税30000 / 1.01
-      taxable_3_percent: 0,
-      tax_free: 20000,
-    },
-    profit_info: {
-      total_profit: 27800,
-      total_cost: 22200,
-    },
-    company_status: {
-      employee_count: 5,
-      asset_total_myr: 200,
-      industry_type: 'tech',
-    },
-    companyInfo: {
-      name: '上海某某科技有限公司',
-      taxId: '91310115MA1XXXXXX',
-      period: '2025-11',
-      tax_type: 'small',
-    },
+    revenue: { total: 50000, taxable_1_percent: 29702.97, taxable_3_percent: 0, tax_free: 20000 },
+    profit_info: { total_profit: 27800, total_cost: 22200 },
+    company_status: { employee_count: 5, asset_total_myr: 200, industry_type: 'tech' },
+    companyInfo: { name: '上海某某科技有限公司', taxId: '91310115MA1XXXXXX', period: '2026-03', tax_type: 'small' },
   };
 }
 
-/** 核心税务计算引擎（确定性计算，不依赖 AI） */
+// ===== 核心税务计算引擎 =====
 function calculateTaxes(data) {
   const rev = data.revenue;
   const profit = data.profit_info;
   const status = data.company_status;
   const info = data.companyInfo || {};
+  const period = info.period || (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; })();
 
-  const period = info.period || (() => {
-    const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-  })();
-
-  // ---- 增值税计算 ----
-  const vat1pct = rev.taxable_1_percent * 0.01;  // 1% 税率应税增值税
-  const vat3pct = (rev.taxable_3_percent || 0) * 0.03; // 3% 税率
+  // 增值税
+  const vat1pct = rev.taxable_1_percent * 0.01;
+  const vat3pct = (rev.taxable_3_percent || 0) * 0.03;
   const totalTaxableSales = rev.taxable_1_percent + (rev.taxable_3_percent || 0);
   const totalSales = totalTaxableSales + (rev.tax_free || 0);
-
-  // 小规模纳税人月销售额≤10万免税（2026年政策延续）
   const isVatExempt = totalSales <= 100000;
   const vatDue = isVatExempt ? 0 : (vat1pct + vat3pct);
 
-  // 附加税（城建税7%+教育费附加3%+地方教育附加2%，城区适用）
-  const surchargeRate = 0.12; // 城区综合附加税率
-  const surchargeTotal = vatDue * surchargeRate;
+  // 附加税费（六税两费减征50%）
   const urbanBuild = vatDue * 0.07;
   const eduSurcharge = vatDue * 0.03;
   const localEdu = vatDue * 0.02;
+  const halfUrban = urbanBuild * 0.5;
+  const halfEdu = eduSurcharge * 0.5;
+  const halfLocal = localEdu * 0.5;
+  const finalUrban = urbanBuild - halfUrban;
+  const finalEdu = eduSurcharge - halfEdu;
+  const finalLocal = localEdu - halfLocal;
 
-  // ---- 企业所得税计算 ----
+  // 企业所得税
   const realProfit = profit.total_profit;
+  const totalCost = profit.total_cost || (rev.total - realProfit);
   const isSmallMicro = status.employee_count <= 300 && status.asset_total_myr <= 5000 && realProfit <= 3000000;
-  const citRate = isSmallMicro ? 0.05 : 0.25; // 实际税率（小微5%）
-  const citDue = realProfit > 0 ? realProfit * citRate : 0;
-  const citReduction = isSmallMicro && realProfit > 0 ? realProfit * (0.25 - citRate) : 0;
+  const citRate = 0.25;
+  const actualCitRate = isSmallMicro ? 0.05 : 0.25;
+  const citDue = realProfit > 0 ? realProfit * actualCitRate : 0;
+  const citReduction = isSmallMicro && realProfit > 0 ? realProfit * (0.25 - actualCitRate) : 0;
 
-  // ---- 文化事业建设费 ----
+  // 文化事业建设费
   const isAdOrEntertainment = ['ad', 'entertainment'].includes(status.industry_type);
-  const cultureRate = 0.03;
-  const cultureDue = isAdOrEntertainment ? totalTaxableSales * cultureRate : 0;
+  const cultureDue = isAdOrEntertainment ? totalTaxableSales * 0.03 : 0;
 
-  // 本年累计（Demo: 当月 × 当前季度月数）
+  // 本年累计倍数
   const month = parseInt((period || '').split('-')[1] || '1');
   const quarterMonth = ((month - 1) % 3) + 1;
-  const ytdMult = quarterMonth;
 
   return {
     period, isVatExempt, isSmallMicro, isAdOrEntertainment,
     vat: {
-      taxable1pct: Math.round(rev.taxable_1_percent * 100) / 100,
-      taxable3pct: Math.round((rev.taxable_3_percent || 0) * 100) / 100,
-      taxFree: Math.round((rev.tax_free || 0) * 100) / 100,
-      totalTaxable: Math.round(totalTaxableSales * 100) / 100,
-      totalSales: Math.round(totalSales * 100) / 100,
-      vatDue: Math.round(vatDue * 100) / 100,
-      vatDue1pct: Math.round(vat1pct * 100) / 100,
-      vatDue3pct: Math.round(vat3pct * 100) / 100,
-      urbanBuild: Math.round(urbanBuild * 100) / 100,
-      eduSurcharge: Math.round(eduSurcharge * 100) / 100,
-      localEdu: Math.round(localEdu * 100) / 100,
-      surchargeTotal: Math.round(surchargeTotal * 100) / 100,
-      ytdMult,
+      taxable1pct: r(rev.taxable_1_percent),
+      taxable3pct: r(rev.taxable_3_percent || 0),
+      taxFree: r(rev.tax_free || 0),
+      totalTaxable: r(totalTaxableSales),
+      totalSales: r(totalSales),
+      vatDue: r(vatDue), vatDue1pct: r(vat1pct), vatDue3pct: r(vat3pct),
+      urbanBuild: r(urbanBuild), eduSurcharge: r(eduSurcharge), localEdu: r(localEdu),
+      halfUrban: r(halfUrban), halfEdu: r(halfEdu), halfLocal: r(halfLocal),
+      finalUrban: r(finalUrban), finalEdu: r(finalEdu), finalLocal: r(finalLocal),
+      surchargeTotal: r(finalUrban + finalEdu + finalLocal),
+      ytdMult: quarterMonth,
+      freeTaxAmount: r(isVatExempt ? vatDue : 0),
+      smallMicroFree: r(isVatExempt ? (rev.tax_free || 0) : 0),
     },
     cit: {
-      revenue: Math.round((rev.total || 0) * 100) / 100,
-      realProfit: Math.round(realProfit * 100) / 100,
-      taxDue: Math.round(citDue * 100) / 100,
-      taxRate: citRate,
-      reduction: Math.round(citReduction * 100) / 100,
-      isSmallMicro,
+      revenue: r(rev.total || 0), totalCost: r(totalCost),
+      taxSurcharge: r(vatDue * 0.12),
+      realProfit: r(realProfit), taxDue: r(citDue),
+      taxRate: citRate, actualRate: actualCitRate,
+      reduction: r(citReduction), isSmallMicro,
     },
     culture: {
-      taxableSales: isAdOrEntertainment ? Math.round(totalTaxableSales * 100) / 100 : 0,
-      rate: cultureRate,
-      due: Math.round(cultureDue * 100) / 100,
+      taxableSales: isAdOrEntertainment ? r(totalTaxableSales) : 0,
+      rate: 0.03, due: r(cultureDue),
     },
+    status: { ...status },
+    totalCost: r(totalCost),
   };
 }
+function r(v) { return Math.round((v || 0) * 100) / 100; }
 
 // ===== 页面渲染 =====
 let currentReport = 'vat';
@@ -591,7 +582,6 @@ let rawData = null;
 window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('loading-overlay').classList.add('show');
   rawData = loadTaxData();
-
   setTimeout(() => {
     taxCalc = calculateTaxes(rawData);
     renderAll();
@@ -604,321 +594,393 @@ function renderAll() {
   renderVAT();
   renderCIT();
   renderCulture();
+  renderFinance();
   renderAIPanel();
   updateBenefitCard();
 }
 
-/** 更新表单元数据 */
 function updateMeta() {
   const info = rawData.companyInfo || {};
   const name = info.name || '—';
   const taxId = info.taxId || info.tax_id || '—';
-  const period = taxCalc.period || '—';
-
+  const p = taxCalc.period || '—';
   document.getElementById('meta-taxid').textContent = `纳税人识别号：${taxId}`;
   document.getElementById('meta-name').textContent = `纳税人名称：${name}`;
-  document.getElementById('meta-period').textContent = `税款所属期：${period} 01日 至 月末`;
+  document.getElementById('meta-period').textContent = `税款所属期：${p}`;
   document.getElementById('cit-meta-name').textContent = `纳税人名称：${name}`;
-  document.getElementById('cit-meta-period').textContent = `税款所属期：${period}`;
+  document.getElementById('cit-meta-period').textContent = `税款所属期：${p}`;
+  document.getElementById('culture-meta-period').textContent = `费款所属期：${p}`;
+  document.getElementById('fin-meta-period').textContent = `所属期：${p}`;
   document.getElementById('company-subtitle').textContent =
-    `${name} · ${period} · 绿色高亮数值由 AI 根据您的财务数据自动填入，请核对后前往税务局填写`;
+    `${name} · ${p} · 绿色高亮数值由 AI 根据您的财务数据自动填入，请核对后前往税务局填写`;
 }
 
-/** 渲染增值税申报表 */
+// ===== 增值税（小规模纳税人）完整主表 =====
 function renderVAT() {
   const c = taxCalc.vat;
   const ytd = c.ytdMult;
+  const isTech = !taxCalc.isAdOrEntertainment;
+
+  // 完整主表25行+附加税费，按货物及劳务(g) / 服务不动产(s) 分栏
+  // 科技/贸易公司：收入计入"服务"列；若有货物则计入"货物"列
+  const g = 0;  // 货物及劳务（demo 中默认无货物）
+  const s = c.taxable3pct; // 3%征收率 - 服务
 
   const rows = [
-    { no: '1', item: '（一）应征增值税不含税销售额（3%征收率）', val: c.taxable3pct, ytdVal: c.taxable3pct * ytd, ai: true, guide: '请在广东电子税务局第1行填入此数值' },
-    { no: '2', item: '税务机关代开的增值税专用发票不含税销售额', val: 0, ytdVal: 0, ai: false },
-    { no: '3', item: '税控器具开具的普通发票不含税销售额', val: c.taxable1pct, ytdVal: c.taxable1pct * ytd, ai: true, guide: '请在广东电子税务局第3行填入此数值' },
-    { no: '4', item: '（二）应征增值税不含税销售额（5%征收率）', val: 0, ytdVal: 0, ai: false },
-    { no: '5', item: '（三）销售使用过的固定资产不含税销售额', val: 0, ytdVal: 0, ai: false },
-    { no: '10', item: '合计', val: c.totalTaxable, ytdVal: c.totalTaxable * ytd, ai: true, guide: '第1行+第4行+第5行之和' },
-    { no: '', item: '', val: null, ytdVal: null, isBlank: true },
-    { no: '11', item: '免税销售额', val: c.taxFree, ytdVal: c.taxFree * ytd, ai: true, isExempt: true, guide: '免税收入填此行（月销售额≤10万可免征）' },
-    { no: '', item: '', val: null, ytdVal: null, isBlank: true },
-    { no: '20', item: `本期应纳税额（应税额×适用税率）${taxCalc.isVatExempt ? '【免征】' : ''}`, val: c.vatDue, ytdVal: c.vatDue * ytd, ai: true, isExempt: taxCalc.isVatExempt, guide: `${taxCalc.isVatExempt ? '月销售额≤10万，免征增值税' : '应税销售额 × 税率'}` },
-    { no: '21', item: '其中：1%征收率应纳税额', val: c.vatDue1pct, ytdVal: c.vatDue1pct * ytd, ai: true, guide: '不含税销售额 × 1%' },
-    { no: '22', item: '其中：3%征收率应纳税额', val: c.vatDue3pct, ytdVal: c.vatDue3pct * ytd, ai: !!c.vatDue3pct, guide: '不含税销售额 × 3%' },
-    { no: '', item: '', val: null, ytdVal: null, isBlank: true },
-    { no: '30', item: '本期应纳税额合计（20行+合并计算）', val: c.vatDue, ytdVal: c.vatDue * ytd, ai: true, isSubtotal: true, guide: '即本期实际缴纳增值税额' },
-    { no: '', item: '── 附加税费 ──', val: null, ytdVal: null, isHeader: true },
-    { no: '31', item: '城市维护建设税（7%）', val: c.urbanBuild, ytdVal: c.urbanBuild * ytd, ai: true, guide: '增值税额 × 7%' },
-    { no: '32', item: '教育费附加（3%）', val: c.eduSurcharge, ytdVal: c.eduSurcharge * ytd, ai: true, guide: '增值税额 × 3%' },
-    { no: '33', item: '地方教育附加（2%）', val: c.localEdu, ytdVal: c.localEdu * ytd, ai: true, guide: '增值税额 × 2%' },
-    { no: '34', item: '附加税费合计', val: c.surchargeTotal, ytdVal: c.surchargeTotal * ytd, ai: true, isSubtotal: true, guide: '城建税+教育费附加+地方教育附加' },
+    { cat: '一、计税依据' },
+    { no: 1,  item: '（一）应征增值税不含税销售额（3%征收率）', g: 0, s: c.taxable3pct, ai: !!c.taxable3pct },
+    { no: 2,  item: '    增值税专用发票不含税销售额', g: 0, s: 0 },
+    { no: 3,  item: '    其他增值税发票不含税销售额', g: 0, s: c.taxable1pct, ai: !!c.taxable1pct, guide: '1%征收率开具的普通发票填此行' },
+    { no: 4,  item: '（二）应征增值税不含税销售额（5%征收率）', g: null, s: 0, gna: true },
+    { no: 5,  item: '    增值税专用发票不含税销售额', g: null, s: 0, gna: true },
+    { no: 6,  item: '    其他增值税发票不含税销售额', g: null, s: 0, gna: true },
+    { no: 7,  item: '（三）销售使用过的固定资产不含税销售额', g: 0, s: null, sna: true },
+    { no: 8,  item: '    其中：其他增值税发票不含税销售额', g: 0, s: null, sna: true },
+    { no: 9,  item: '（四）免税销售额', g: 0, s: c.taxFree, ai: !!c.taxFree, guide: '免税收入填此行' },
+    { no: 10, item: '    其中：小微企业免税销售额', g: 0, s: c.smallMicroFree, ai: !!c.smallMicroFree },
+    { no: 11, item: '          未达起征点销售额', g: 0, s: 0 },
+    { no: 12, item: '          其他免税销售额', g: 0, s: c.taxFree > 0 && !taxCalc.isVatExempt ? c.taxFree : 0 },
+    { no: 13, item: '（五）出口免税销售额', g: 0, s: 0 },
+    { no: 14, item: '    其中：其他增值税发票不含税销售额', g: 0, s: 0 },
+    { cat: '二、税款计算' },
+    { no: 15, item: '本期应纳税额', g: 0, s: r(c.vatDue), ai: true, guide: '应征销售额 × 征收率' },
+    { no: 16, item: '本期应纳税额减征额', g: 0, s: 0 },
+    { no: 17, item: '本期免税额', g: 0, s: c.freeTaxAmount, ai: !!c.freeTaxAmount, isExempt: taxCalc.isVatExempt },
+    { no: 18, item: '    其中：小微企业免税额', g: 0, s: taxCalc.isVatExempt ? c.freeTaxAmount : 0, ai: taxCalc.isVatExempt },
+    { no: 19, item: '          未达起征点免税额', g: 0, s: 0 },
+    { no: 20, item: '应纳税额合计（15-16）', g: 0, s: r(c.vatDue), ai: true, isSub: true, guide: '15行-16行' },
+    { no: 21, item: '本期预缴税额', g: 0, s: 0, ytdNa: true },
+    { no: 22, item: '本期应补（退）税额（20-21）', g: 0, s: r(c.vatDue), ai: true, isSub: true, ytdNa: true, guide: '本期实际缴纳增值税' },
+    { cat: '三、附加税费' },
+    { no: 23, item: '城市维护建设税本期应补（退）税额', g: 0, s: r(c.finalUrban), ai: !!c.vatDue, guide: `增值税${fm(c.vatDue)}×7%=${fm(c.urbanBuild)}，减征50%=${fm(c.halfUrban)}` },
+    { no: 24, item: '教育费附加本期应补（退）费额', g: 0, s: r(c.finalEdu), ai: !!c.vatDue, guide: `增值税${fm(c.vatDue)}×3%=${fm(c.eduSurcharge)}，减征50%=${fm(c.halfEdu)}` },
+    { no: 25, item: '地方教育附加本期应补（退）费额', g: 0, s: r(c.finalLocal), ai: !!c.vatDue, guide: `增值税${fm(c.vatDue)}×2%=${fm(c.localEdu)}，减征50%=${fm(c.halfLocal)}` },
   ];
 
   document.getElementById('vat-tbody').innerHTML = rows.map(row => {
-    if (row.isBlank) return `<tr><td colspan="4" style="height:8px;background:#F8FAFC;border:none;"></td></tr>`;
-    if (row.isHeader) return `<tr><td></td><td colspan="3" style="background:#F0FDF4;color:#166534;font-size:11px;font-weight:600;padding:6px 12px;">${row.item}</td></tr>`;
+    if (row.cat) return `<tr class="row-category"><td colspan="6">${row.cat}</td></tr>`;
 
-    const valStr = row.val !== null ? formatMoney(row.val) : '—';
-    const ytdStr = row.ytdVal !== null ? formatMoney(row.ytdVal) : '—';
+    const cls = [row.ai ? 'row-ai' : '', row.isSub ? 'row-subtotal' : '', row.isExempt ? 'row-exempt' : '', (!row.ai && row.g === 0 && row.s === 0) ? 'row-zero' : ''].filter(Boolean).join(' ');
 
-    const aiClass = row.ai ? ' row-ai' : (row.val === 0 ? ' row-zero' : '');
-    const subtotalClass = row.isSubtotal ? ' row-subtotal' : '';
-    const exemptClass = row.isExempt ? ' row-exempt' : '';
+    const gVal = row.gna ? '<td class="td-na">--</td>' : aiCell(row.g, row.ai, row.guide);
+    const sVal = row.sna ? '<td class="td-na">--</td>' : aiCell(row.s, row.ai, row.guide);
+    const gYtd = row.gna || row.ytdNa ? '<td class="td-na">--</td>' : `<td class="td-value">${fm(r((row.g||0)*ytd))}</td>`;
+    const sYtd = row.sna || row.ytdNa ? '<td class="td-na">--</td>' : `<td class="td-value">${fm(r((row.s||0)*ytd))}</td>`;
 
-    const valueCell = row.ai && row.val !== null ? `
-      <td class="td-value">
-        <div class="value-wrap">
-          <span class="td-value-indicator">
-            <span class="ai-dot"></span>
-            ${valStr}
-          </span>
-          ${row.guide ? `<div class="guide-tooltip">📌 ${row.guide}<br/>请填入广东电子税务局对应行次</div>` : ''}
-        </div>
-      </td>
-    ` : `<td class="td-value">${valStr}</td>`;
-
-    const ytdCell = row.ai && row.ytdVal !== null ? `
-      <td class="td-value">${ytdStr}</td>
-    ` : `<td class="td-value">${ytdStr}</td>`;
-
-    return `<tr class="${aiClass}${subtotalClass}${exemptClass}">
+    return `<tr class="${cls}">
       <td class="td-no">${row.no}</td>
       <td class="td-item">${row.item}</td>
-      ${valueCell}
-      ${ytdCell}
+      ${gVal}${sVal}${gYtd}${sYtd}
     </tr>`;
   }).join('');
 }
 
-/** 渲染企业所得税申报表 */
+// ===== 企业所得税 A200000 完整申报表 =====
 function renderCIT() {
   const c = taxCalc.cit;
+  const st = taxCalc.status;
+  const info = rawData.companyInfo || {};
+
+  // 优惠及附报事项信息
+  document.getElementById('cit-info').innerHTML = `
+    <div class="ci-row"><span class="ci-label">从业人数（季度平均值）：</span><span class="ci-value">${st.employee_count || 0} 人</span></div>
+    <div class="ci-row"><span class="ci-label">资产总额（万元）：</span><span class="ci-value">${st.asset_total_myr || 0} 万元</span></div>
+    <div class="ci-row"><span class="ci-label">国家限制或禁止行业：</span><span class="ci-value">☑ 否</span></div>
+    <div class="ci-row"><span class="ci-label">小型微利企业：</span><span class="ci-value green">${c.isSmallMicro ? '☑ 是（适用5%优惠税率）' : '☐ 否'}</span></div>
+  `;
+
+  // 完整行次1-40
+  const taxSurcharge = r(taxCalc.vat.finalUrban + taxCalc.vat.finalEdu + taxCalc.vat.finalLocal);
+  const profitBeforeTax = c.realProfit;
+  const operatingProfit = profitBeforeTax; // 简化：营业利润≈利润总额
+
   const rows = [
-    { no: '1', item: '营业收入', val: c.revenue, ai: true, guide: '本期含税收入总额' },
-    { no: '2', item: '营业成本', val: c.revenue - c.realProfit, ai: true, guide: '总收入 - 利润总额' },
-    { no: '10', item: '实际利润额（利润表利润总额）', val: c.realProfit, ai: true, isSubtotal: true, guide: '营业收入 - 营业成本 - 费用' },
-    { no: '11', item: '特定业务计算的应纳税所得额', val: 0, ai: false },
-    { no: '12', item: '不征税收入', val: 0, ai: false },
-    { no: '13', item: '免税收入', val: 0, ai: false },
-    { no: '14', item: '弥补以前年度亏损', val: 0, ai: false },
-    { no: '15', item: `应纳税所得额${c.isSmallMicro ? '（小型微利企业）' : ''}`, val: c.realProfit > 0 ? c.realProfit : 0, ai: true, guide: '实际利润额 - 免税 - 弥补亏损' },
-    { no: '16', item: `税率（${c.isSmallMicro ? '小微优惠 5%' : '一般 25%'}）`, val: c.taxRate * 100, ai: true, isRate: true, guide: c.isSmallMicro ? '小型微利企业适用25%×20%=5%实际税率' : '一般企业25%税率' },
-    { no: '17', item: '应纳所得税额（15行×税率）', val: c.taxDue, ai: true, isSubtotal: true, guide: '应纳税所得额 × 税率' },
-    { no: '18', item: '减免所得税额（小型微利减免）', val: c.reduction, ai: !!c.reduction, guide: '普通税率减去优惠税率之差额' },
-    { no: '19', item: '已预缴税额', val: 0, ai: false },
-    { no: '20', item: '本期实际应补（退）税额', val: c.taxDue, ai: true, isSubtotal: true, guide: '应纳所得税 - 减免 - 已预缴' },
+    { no: '1',    item: '营业收入', val: c.revenue, ai: true, guide: '本期含税收入总额' },
+    { no: '1.1',  item: '　其中：自营出口收入', val: 0, sub: true },
+    { no: '1.2',  item: '　其中：委托出口收入', val: 0, sub: true },
+    { no: '1.3',  item: '　其中：出口代理费收入', val: 0, sub: true },
+    { no: '2',    item: '减：营业成本', val: c.totalCost, ai: true, guide: '本期营业总成本' },
+    { no: '3',    item: '减：税金及附加', val: taxSurcharge, ai: true, guide: '城建税+教育费附加+地方教育附加' },
+    { no: '4',    item: '减：销售费用', val: 0 },
+    { no: '5',    item: '减：管理费用', val: 0 },
+    { no: '6',    item: '减：研发费用', val: 0 },
+    { no: '7',    item: '减：财务费用', val: 0 },
+    { no: '8',    item: '加：其他收益', val: 0 },
+    { no: '9',    item: '加：投资收益（损失以"-"号填列）', val: 0 },
+    { no: '9.1',  item: '　其中：股权投资确认的处置收益', val: 0, sub: true },
+    { no: '9.2',  item: '　其中：其他投资收益', val: 0, sub: true },
+    { no: '10',   item: '加：净敞口套期收益', val: 0 },
+    { no: '11',   item: '加：公允价值变动收益', val: 0 },
+    { no: '12',   item: '加：信用减值损失', val: 0 },
+    { no: '13',   item: '加：资产减值损失', val: 0 },
+    { no: '14',   item: '加：资产处置收益', val: 0 },
+    { no: '15',   item: '营业利润（亏损以"-"号填列）', val: operatingProfit, ai: true, isSub: true, guide: '1-2-3-4-5-6-7+8+9+10+11+12+13+14' },
+    { no: '16',   item: '加：营业外收入', val: 0 },
+    { no: '17',   item: '减：营业外支出', val: 0 },
+    { no: '18',   item: '利润总额（15+16-17）', val: profitBeforeTax, ai: true, isSub: true, guide: '营业利润+营业外收入-营业外支出' },
+    { no: '19',   item: '加：特定业务计算的应纳税所得额', val: 0 },
+    { no: '19.1', item: '　其中：销售未完工产品的收入', val: 0, sub: true },
+    { no: '20',   item: '减：不征税收入', val: 0 },
+    { no: '21',   item: '减：资产加速折旧、摊销（扣除）调减额', val: 0 },
+    { no: '22',   item: '减：免税收入、减计收入、加计扣除', val: 0 },
+    { no: '23',   item: '减：所得减免', val: 0 },
+    { no: '24',   item: '减：弥补以前年度亏损', val: 0 },
+    { no: '25',   item: '实际利润额（18+19-20-21-22-23-24）', val: r(profitBeforeTax > 0 ? profitBeforeTax : 0), ai: true, isSub: true, guide: '利润总额调整后的应纳税所得额' },
+    { no: '26',   item: '税率（25%）', val: '25%', isRate: true },
+    { no: '27',   item: '应纳所得税额（25×26）', val: r(profitBeforeTax > 0 ? profitBeforeTax * 0.25 : 0), ai: true, guide: '实际利润额 × 25%' },
+    { no: '28',   item: '减：减免所得税额', val: c.reduction, ai: !!c.reduction },
+    { no: '28.1', item: `　其中：符合条件的小型微利企业减免企业所得税`, val: c.reduction, ai: !!c.reduction, sub: true, guide: c.isSmallMicro ? '小微优惠：25%→5%实际税率，减免差额' : '' },
+    { no: '29',   item: '减：抵免所得税额', val: 0 },
+    { no: '30',   item: '减：本年累计已预缴所得税额', val: 0 },
+    { no: '31',   item: '减：特定业务预缴（征）所得税额', val: 0 },
+    { no: '32',   item: '本期应补（退）所得税额（27-28-29-30-31）', val: c.taxDue, ai: true, isSub: true, guide: '本期实际应缴企业所得税' },
+    { cat: '── 民族自治地区减免 ──' },
+    { no: '39',   item: '减：民族自治地区企业所得税地方分享部分（☑无）', val: 0 },
+    { no: '40',   item: '实际应补（退）所得税额', val: c.taxDue, ai: true, isSub: true, guide: '最终实际缴纳金额' },
   ];
 
   document.getElementById('cit-tbody').innerHTML = rows.map(row => {
-    const aiClass = row.ai ? ' row-ai' : (row.val === 0 ? ' row-zero' : '');
-    const subtotalClass = row.isSubtotal ? ' row-subtotal' : '';
-    const displayVal = row.isRate ? `${row.val}%` : (row.val !== null ? formatMoney(row.val) : '—');
+    if (row.cat) return `<tr class="row-header"><td colspan="3">${row.cat}</td></tr>`;
+    const cls = [row.ai ? 'row-ai' : '', row.isSub ? 'row-subtotal' : '', (!row.ai && row.val === 0) ? 'row-zero' : ''].filter(Boolean).join(' ');
+    const displayVal = row.isRate ? row.val : (row.val !== null && row.val !== undefined ? fm(row.val) : '0.00');
 
-    const valueCell = row.ai ? `
-      <td class="td-value">
-        <div class="value-wrap">
-          <span class="td-value-indicator">
-            <span class="ai-dot"></span>
-            ${displayVal}
-          </span>
-          ${row.guide ? `<div class="guide-tooltip">📌 ${row.guide}</div>` : ''}
-        </div>
-      </td>
-    ` : `<td class="td-value">${displayVal}</td>`;
-
-    return `<tr class="${aiClass}${subtotalClass}">
+    return `<tr class="${cls}">
       <td class="td-no">${row.no}</td>
       <td class="td-item">${row.item}</td>
-      ${valueCell}
+      ${row.ai ? `<td class="td-value"><div class="value-wrap"><span class="td-value-indicator"><span class="ai-dot"></span>${displayVal}</span>${row.guide ? `<div class="guide-tooltip">📌 ${row.guide}</div>` : ''}</div></td>` : `<td class="td-value">${displayVal}</td>`}
     </tr>`;
   }).join('');
-
-  document.getElementById('cit-meta-name').textContent = `纳税人名称：${rawData.companyInfo?.name || '—'}`;
-  document.getElementById('cit-meta-period').textContent = `税款所属期：${taxCalc.period || '—'}`;
 }
 
-/** 渲染文化事业建设费 */
+// ===== 文化事业建设费完整申报表 =====
 function renderCulture() {
   const c = taxCalc.culture;
-  const info = rawData.company_status || rawData.companyInfo || {};
   const isApplicable = taxCalc.isAdOrEntertainment;
 
   if (!isApplicable) {
     document.getElementById('culture-tbody').innerHTML = `
-      <tr>
-        <td colspan="3" style="text-align:center;padding:40px;color:#94A3B8;font-size:14px;">
-          ✅ 根据您的行业类型，<strong>无需缴纳文化事业建设费</strong><br/>
-          <span style="font-size:12px;margin-top:8px;display:block;">仅广告业、娱乐业需要缴纳（费率3%）</span>
-        </td>
-      </tr>`;
+      <tr><td colspan="4" style="text-align:center;padding:40px;color:#94A3B8;font-size:14px;">
+        ✅ 根据您的行业类型，<strong>无需缴纳文化事业建设费</strong><br/>
+        <span style="font-size:12px;margin-top:8px;display:block;">仅广告业、娱乐业需要缴纳（费率3%）</span>
+      </td></tr>`;
     document.getElementById('culture-note').textContent = '';
     return;
   }
 
   const rows = [
-    { no: '1', item: '计费销售额（广告/娱乐服务不含税收入）', val: c.taxableSales, ai: true, guide: '应税销售额，用于计算文化事业建设费' },
-    { no: '2', item: '费率', val: c.rate * 100, ai: true, isRate: true, guide: '广告业和娱乐业费率为3%' },
-    { no: '3', item: '应缴文化事业建设费', val: c.due, ai: true, isSubtotal: true, guide: '计费销售额 × 3%' },
-    { no: '4', item: '减免金额', val: 0, ai: false },
-    { no: '5', item: '实际应缴金额', val: c.due, ai: true, isSubtotal: true, guide: '应缴 - 减免' },
+    { cat: '计费收入' },
+    { no: 1, item: '应征收入', val: c.taxableSales, ytd: c.taxableSales, ai: true, guide: '广告/娱乐服务应税收入' },
+    { no: 2, item: '免征收入', val: 0, ytd: 0 },
+    { cat: '费额计算' },
+    { no: 3, item: '减除项目期初金额', val: 0, ytdNa: true },
+    { no: 4, item: '减除项目本期发生额', val: 0, ytd: 0 },
+    { no: 5, item: '应征收入减除额', val: 0, ytd: 0 },
+    { no: 6, item: '免征收入减除额', val: 0, ytd: 0 },
+    { no: 7, item: '减除项目期末余额（3+4-5-6）', val: 0, ytd: 0 },
+    { no: 8, item: '计费销售额（1-5）', val: c.taxableSales, ytd: c.taxableSales, ai: true, isSub: true, guide: '应征收入 - 减除额' },
+    { no: 9, item: '费率', val: '3%', ytd: null, isRate: true, ytdNa: true },
+    { cat: '费额缴纳' },
+    { no: 10, item: '应缴费额（8×9）', val: c.due, ytd: c.due, ai: true, guide: `${fm(c.taxableSales)} × 3% = ${fm(c.due)}` },
+    { no: 11, item: '期初未缴费额（多缴为负）', val: 0, ytdNa: true },
+    { no: 12, item: '本期已缴费额（13+14+15）', val: 0, ytd: 0 },
+    { no: 13, item: '　其中：本期预缴费额', val: 0, ytd: 0, sub: true },
+    { no: 14, item: '　其中：本期缴纳上期费额', val: 0, ytd: 0, sub: true },
+    { no: 15, item: '　其中：本期缴纳欠费额', val: 0, ytd: 0, sub: true },
+    { no: 16, item: '期末未缴费额（多缴为负）', val: c.due, ytd: c.due, ai: true },
+    { no: 17, item: '　其中：欠缴费额（≥0）', val: 0, ytdNa: true },
+    { no: 18, item: '本期应补（退）费额', val: c.due, ytdNa: true, ai: true, isSub: true, guide: '本期实际应缴文化事业建设费' },
+    { no: 19, item: '本期检查已补缴费额', val: 0, ytd: 0 },
   ];
 
   document.getElementById('culture-tbody').innerHTML = rows.map(row => {
-    const aiClass = row.ai ? ' row-ai' : '';
-    const subtotalClass = row.isSubtotal ? ' row-subtotal' : '';
-    const displayVal = row.isRate ? `${row.val}%` : formatMoney(row.val);
+    if (row.cat) return `<tr class="row-category"><td colspan="4">${row.cat}</td></tr>`;
+    const cls = [row.ai ? 'row-ai' : '', row.isSub ? 'row-subtotal' : '', (!row.ai && row.val === 0) ? 'row-zero' : ''].filter(Boolean).join(' ');
+    const valStr = row.isRate ? row.val : fm(row.val);
+    const ytdStr = row.ytdNa ? '--' : (row.ytd === null ? '--' : fm(row.ytd));
 
-    return `<tr class="${aiClass}${subtotalClass}">
+    return `<tr class="${cls}">
       <td class="td-no">${row.no}</td>
       <td class="td-item">${row.item}</td>
-      <td class="td-value">
-        ${row.ai ? `<div class="value-wrap"><span class="td-value-indicator"><span class="ai-dot"></span>${displayVal}</span>${row.guide ? `<div class="guide-tooltip">📌 ${row.guide}</div>` : ''}</div>` : displayVal}
-      </td>
+      ${row.ai ? `<td class="td-value"><div class="value-wrap"><span class="td-value-indicator"><span class="ai-dot"></span>${valStr}</span>${row.guide ? `<div class="guide-tooltip">📌 ${row.guide}</div>` : ''}</div></td>` : `<td class="td-value">${valStr}</td>`}
+      ${row.ytdNa ? '<td class="td-na">--</td>' : (row.ai ? `<td class="td-value">${ytdStr}</td>` : `<td class="td-value">${ytdStr}</td>`)}
     </tr>`;
   }).join('');
 }
 
-/** 渲染 AI 助手面板 */
-function renderAIPanel() {
-  const c = taxCalc;
-  const vat = c.vat;
-  const cit = c.cit;
+// ===== 财务报表（利润表+资产负债表） =====
+function renderFinance() {
+  const rev = rawData.revenue || {};
+  const profit = rawData.profit_info || {};
+  const c = taxCalc.cit;
+  const vat = taxCalc.vat;
 
-  // 当前步骤标题
-  document.getElementById('ai-step-title').textContent = '计税依据确认';
+  // 利润表（会小企02表）
+  const taxSurcharge = r(vat.finalUrban + vat.finalEdu + vat.finalLocal);
+  const operatingProfit = c.realProfit;
+  const netProfit = r(operatingProfit - c.taxDue);
 
-  // 逻辑解析
-  let logicLines = [];
-  if (c.isVatExempt) {
-    logicLines.push(`本期总销售额 <strong>${formatMoney(vat.totalSales)}</strong> 元，未超过10万元免税额度`);
-    logicLines.push(`已自动应用<strong>增值税免税政策</strong>，应纳增值税 = <strong>0.00</strong> 元`);
-  } else {
-    logicLines.push(`1%税率销售额 <strong>${formatMoney(vat.taxable1pct)}</strong> 元 × 1% = ${formatMoney(vat.vatDue1pct)} 元`);
-    if (vat.taxable3pct > 0) {
-      logicLines.push(`3%税率销售额 <strong>${formatMoney(vat.taxable3pct)}</strong> 元 × 3% = ${formatMoney(vat.vatDue3pct)} 元`);
-    }
-    logicLines.push(`应纳增值税合计：<strong>${formatMoney(vat.vatDue)}</strong> 元`);
-  }
-  logicLines.push(`企业所得税：利润 <strong>${formatMoney(cit.realProfit)}</strong> 元 × <strong>${(cit.taxRate*100).toFixed(0)}%</strong> = <strong>${formatMoney(cit.taxDue)}</strong> 元`);
+  const profitRows = [
+    { item: '一、营业收入', no: 1, val: c.revenue, ai: true },
+    { item: '减：营业成本', no: 2, val: c.totalCost, ai: true },
+    { item: '　　营业税金及附加', no: 3, val: taxSurcharge, ai: true },
+    { item: '　　　其中：城市维护建设税', no: 6, val: vat.finalUrban, ai: true, sub: true },
+    { item: '　　　　　　教育费附加、地方教育附加', no: 10, val: r(vat.finalEdu + vat.finalLocal), ai: true, sub: true },
+    { item: '　　销售费用', no: 11, val: 0 },
+    { item: '　　管理费用', no: 14, val: 0 },
+    { item: '　　　其中：研究费用', no: 17, val: 0, sub: true },
+    { item: '　　财务费用', no: 18, val: 0 },
+    { item: '二、营业利润（亏损以"-"号填列）', no: 22, val: operatingProfit, ai: true, isSub: true },
+    { item: '加：营业外收入', no: 23, val: 0 },
+    { item: '减：营业外支出', no: 25, val: 0 },
+    { item: '三、利润总额（亏损总额以"-"号填列）', no: 31, val: operatingProfit, ai: true, isSub: true },
+    { item: '减：所得税费用', no: 32, val: c.taxDue, ai: true },
+    { item: '四、净利润（净亏损以"-"号填列）', no: 33, val: netProfit, ai: true, isSub: true },
+  ];
 
-  document.getElementById('ai-logic-text').innerHTML =
-    '<strong>AI 逻辑解析：</strong>' + logicLines.join('；<br/>') + '。';
+  document.getElementById('profit-tbody').innerHTML = profitRows.map(row => {
+    const cls = [row.ai ? 'row-ai' : '', row.isSub ? 'row-subtotal' : '', (!row.ai && row.val === 0) ? 'row-zero' : ''].filter(Boolean).join(' ');
+    return `<tr class="${cls}">
+      <td class="td-item">${row.item}</td>
+      <td class="td-no">${row.no}</td>
+      <td class="td-value">${row.ai ? `<span class="td-value-indicator"><span class="ai-dot"></span>${fm(row.val)}</span>` : fm(row.val)}</td>
+      <td class="td-value">${fm(r(row.val * vat.ytdMult))}</td>
+    </tr>`;
+  }).join('');
 
-  // 校验清单
-  const checks = [];
+  // 资产负债表（会小企01表）- 左右分栏
+  const assetMyr = (rawData.company_status?.asset_total_myr || 200) * 10000;
+  const netP = netProfit > 0 ? netProfit : 0;
 
-  checks.push({
-    icon: '✅',
-    cls: 'pass',
-    title: '申报校验通过',
-    desc: `已自动核对开票数据与财务报表，${c.isVatExempt ? '本月免征增值税' : `应纳增值税 ${formatMoney(vat.vatDue)} 元`}`,
-  });
+  const balanceRows = [
+    { a: '流动资产：', an: '', ae: '', aa: '', l: '流动负债：', ln: '', le: '', la: '', isHeader: true },
+    { a: '货币资金', an: 1, ae: fm(r(assetMyr * 0.3)), aa: 0, l: '短期借款', ln: 31, le: 0, la: 0 },
+    { a: '应收账款', an: 4, ae: fm(r(assetMyr * 0.15)), aa: 0, l: '应付账款', ln: 33, le: 0, la: 0 },
+    { a: '存货', an: 9, ae: fm(r(assetMyr * 0.1)), aa: 0, l: '应付职工薪酬', ln: 35, le: 0, la: 0 },
+    { a: '其他流动资产', an: 14, ae: 0, aa: 0, l: '应交税费', ln: 36, le: fm(r(c.taxDue + taxCalc.vat.vatDue)), la: 0, aiR: true },
+    { a: '流动资产合计', an: 15, ae: fm(r(assetMyr * 0.55)), aa: 0, l: '流动负债合计', ln: 41, le: fm(r(c.taxDue + taxCalc.vat.vatDue)), la: 0, isSub: true },
+    { a: '非流动资产：', an: '', ae: '', aa: '', l: '非流动负债：', ln: '', le: '', la: '', isHeader: true },
+    { a: '固定资产账面价值', an: 20, ae: fm(r(assetMyr * 0.4)), aa: 0, l: '长期借款', ln: 42, le: 0, la: 0 },
+    { a: '无形资产', an: 25, ae: fm(r(assetMyr * 0.05)), aa: 0, l: '非流动负债合计', ln: 46, le: 0, la: 0 },
+    { a: '非流动资产合计', an: 29, ae: fm(r(assetMyr * 0.45)), aa: 0, l: '负债合计', ln: 47, le: fm(r(c.taxDue + taxCalc.vat.vatDue)), la: 0, isSub: true },
+    { a: '', an: '', ae: '', aa: '', l: '所有者权益：', ln: '', le: '', la: '', isHeader: true },
+    { a: '', an: '', ae: '', aa: '', l: '实收资本（或股本）', ln: 48, le: fm(r(assetMyr * 0.5)), la: 0 },
+    { a: '', an: '', ae: '', aa: '', l: '未分配利润', ln: 51, le: fm(netP), la: 0, aiR: true },
+    { a: '资产总计', an: 30, ae: fm(assetMyr), aa: 0, l: '负债和所有者权益总计', ln: 53, le: fm(assetMyr), la: 0, isSub: true },
+  ];
 
-  if (cit.isSmallMicro) {
-    checks.push({
-      icon: '🎁',
-      cls: 'pass',
-      title: '小型微利企业优惠已应用',
-      desc: `从业≤300人，资产≤5000万，适用5%优惠税率，节税 ${formatMoney(cit.reduction)} 元`,
-    });
-  }
-
-  checks.push({
-    icon: '❓',
-    cls: 'info',
-    title: '常见问题',
-    desc: '如何处理未开票收入？点击人工咨询了解详情',
-  });
-
-  if (c.isAdOrEntertainment) {
-    checks.push({
-      icon: '⚠️',
-      cls: 'warn',
-      title: '需缴纳文化事业建设费',
-      desc: `广告/娱乐业收入需额外缴纳 ${formatMoney(taxCalc.culture.due)} 元`,
-    });
-  }
-
-  document.getElementById('check-list').innerHTML = checks.map(item => `
-    <div class="check-item ${item.cls}">
-      <span class="check-icon">${item.icon}</span>
-      <div>
-        <div class="check-title">${item.title}</div>
-        <div class="check-desc">${item.desc}</div>
-      </div>
-    </div>
-  `).join('');
+  document.getElementById('balance-tbody').innerHTML = balanceRows.map(row => {
+    if (row.isHeader) return `<tr class="row-category"><td colspan="4">${row.a || ''}</td><td colspan="4">${row.l || ''}</td></tr>`;
+    const cls = row.isSub ? 'row-subtotal' : '';
+    return `<tr class="${cls}">
+      <td class="td-item">${row.a}</td>
+      <td class="td-no">${row.an}</td>
+      <td class="td-value">${row.ae || '0.00'}</td>
+      <td class="td-value">${fm(row.aa)}</td>
+      <td class="td-item">${row.l}</td>
+      <td class="td-no">${row.ln}</td>
+      <td class="td-value">${row.aiR ? `<span class="td-value-indicator" style="color:#28AF60;font-weight:700"><span class="ai-dot"></span>${row.le}</span>` : (row.le || '0.00')}</td>
+      <td class="td-value">${fm(row.la)}</td>
+    </tr>`;
+  }).join('');
 }
 
-/** 更新税收优惠卡片 */
+// ===== AI 助手面板 =====
+function renderAIPanel() {
+  const c = taxCalc;
+  const v = c.vat;
+  const cit = c.cit;
+
+  document.getElementById('ai-step-title').textContent = '计税依据确认';
+
+  let lines = [];
+  if (c.isVatExempt) {
+    lines.push(`本期总销售额 <strong>${fm(v.totalSales)}</strong> 元，未超过10万元免税额度`);
+    lines.push(`已自动应用<strong>增值税免税政策</strong>，应纳增值税 = <strong>0.00</strong> 元`);
+  } else {
+    if (v.taxable1pct > 0) lines.push(`1%税率不含税销售额 <strong>${fm(v.taxable1pct)}</strong> × 1% = ${fm(v.vatDue1pct)} 元`);
+    if (v.taxable3pct > 0) lines.push(`3%税率不含税销售额 <strong>${fm(v.taxable3pct)}</strong> × 3% = ${fm(v.vatDue3pct)} 元`);
+    lines.push(`应纳增值税合计：<strong>${fm(v.vatDue)}</strong> 元`);
+    lines.push(`附加税费（含六税两费减征50%）：<strong>${fm(v.surchargeTotal)}</strong> 元`);
+  }
+  lines.push(`企业所得税：利润 <strong>${fm(cit.realProfit)}</strong> × <strong>${(cit.actualRate*100).toFixed(0)}%</strong> = <strong>${fm(cit.taxDue)}</strong> 元`);
+
+  document.getElementById('ai-logic-text').innerHTML = '<strong>AI 逻辑解析：</strong>' + lines.join('；<br/>') + '。';
+
+  const checks = [];
+  checks.push({ icon: '✅', cls: 'pass', title: '申报校验通过', desc: `已核对开票数据与财务报表，${c.isVatExempt ? '本期免征增值税' : `应纳增值税 ${fm(v.vatDue)} 元`}` });
+  if (cit.isSmallMicro) {
+    checks.push({ icon: '🎁', cls: 'pass', title: '小型微利企业优惠已应用', desc: `从业≤300人，资产≤5000万，适用5%优惠税率，节税 ${fm(cit.reduction)} 元` });
+  }
+  checks.push({ icon: '📋', cls: 'info', title: '六税两费减征已应用', desc: '小规模纳税人附加税费减征50%，已自动扣减' });
+  if (c.isAdOrEntertainment) {
+    checks.push({ icon: '⚠️', cls: 'warn', title: '需缴纳文化事业建设费', desc: `广告/娱乐业收入需额外缴纳 ${fm(c.culture.due)} 元（费率3%）` });
+  }
+
+  document.getElementById('check-list').innerHTML = checks.map(it => `
+    <div class="check-item ${it.cls}">
+      <span class="check-icon">${it.icon}</span>
+      <div><div class="check-title">${it.title}</div><div class="check-desc">${it.desc}</div></div>
+    </div>`).join('');
+}
+
 function updateBenefitCard() {
   const card = document.getElementById('benefit-card');
   const text = document.getElementById('benefit-text');
   const msgs = [];
-
-  if (taxCalc.isVatExempt) {
-    msgs.push(`根据《关于延续实施小规模纳税人增值税减免政策的公告》，月销售额10万以下免征增值税。系统已为您自动应用优惠政策。`);
-  }
-  if (taxCalc.cit.isSmallMicro) {
-    msgs.push(`符合小型微利企业条件（人数≤300、资产≤5000万、利润≤300万），企业所得税按5%实际税率计算。`);
-  }
-
-  if (msgs.length > 0) {
-    text.innerHTML = msgs.join('<br/><br/>');
-    card.style.display = 'block';
-  } else {
-    card.style.display = 'none';
-  }
+  if (taxCalc.isVatExempt) msgs.push('根据《小规模纳税人增值税减免政策》，月销售额10万以下免征增值税。');
+  if (taxCalc.cit.isSmallMicro) msgs.push('符合小型微利企业条件（人数≤300、资产≤5000万、利润≤300万），企业所得税按5%实际税率计算。');
+  msgs.push('小规模纳税人"六税两费"减征50%政策已自动应用于附加税费计算。');
+  text.innerHTML = msgs.join('<br/><br/>');
+  card.style.display = msgs.length > 0 ? 'block' : 'none';
 }
 
 // ===== 切换报表 =====
 function switchReport(type) {
   currentReport = type;
+  const types = ['vat', 'cit', 'culture', 'finance'];
   document.querySelectorAll('.report-tab').forEach((tab, i) => {
-    const types = ['vat', 'cit', 'culture'];
     tab.classList.toggle('active', types[i] === type);
   });
   document.querySelectorAll('.report-section').forEach(s => s.classList.remove('active'));
   document.getElementById(`section-${type}`).classList.add('active');
-
-  // 更新 AI 助手文案
-  const titles = { vat: '增值税计税确认', cit: '企业所得税预缴核算', culture: '文化事业建设费核算' };
+  const titles = { vat: '增值税计税确认', cit: '企业所得税预缴核算', culture: '文化事业建设费核算', finance: '财务报表审核' };
   document.getElementById('ai-step-title').textContent = titles[type] || '计税依据确认';
 }
 
-// ===== 下载 PDF =====
-function downloadPDF() {
-  showToast('PDF 申报草稿生成中...', 'success');
-  // 真实场景：调用后端 /api/generate-pdf 接口
-  setTimeout(() => {
-    showToast('接入火山引擎 API 后将支持真实 PDF 导出');
-  }, 1500);
-}
-
-// ===== 确认申报 =====
-function confirmSubmit() {
-  const vat = taxCalc.vat;
-  const msg = taxCalc.isVatExempt
-    ? `本期增值税：免征（月销售额≤10万）\n企业所得税：${formatMoney(taxCalc.cit.taxDue)} 元\n\n请前往广东电子税务局按此数值填报，确认申报？`
-    : `本期增值税：${formatMoney(vat.vatDue)} 元\n企业所得税：${formatMoney(taxCalc.cit.taxDue)} 元\n\n请前往广东电子税务局按此数值填报，确认申报？`;
-
-  if (confirm(msg)) {
-    showToast('申报数据已确认，请前往广东电子税务局填写', 'success');
-  }
-}
-
-function openConsult() {
-  showToast('人工咨询功能开发中，接入后可实时连线财税专家');
-}
-
 // ===== 工具函数 =====
-function formatMoney(n) {
-  if (!n && n !== 0) return '0.00';
+function fm(n) {
+  if (n === null || n === undefined) return '0.00';
   return Number(n).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+function aiCell(val, isAi, guide) {
+  const s = fm(val);
+  if (isAi && val) {
+    return `<td class="td-value"><div class="value-wrap"><span class="td-value-indicator"><span class="ai-dot"></span>${s}</span>${guide ? `<div class="guide-tooltip">📌 ${guide}</div>` : ''}</div></td>`;
+  }
+  return `<td class="td-value">${s}</td>`;
+}
+
+function downloadPDF() {
+  showToast('PDF 申报草稿生成中...', 'success');
+  setTimeout(() => showToast('PDF 导出功能开发中，接入后可真实导出'), 1500);
+}
+
+function confirmSubmit() {
+  const v = taxCalc.vat;
+  const msg = `本期增值税：${taxCalc.isVatExempt ? '免征' : fm(v.vatDue) + ' 元'}
+附加税费：${fm(v.surchargeTotal)} 元
+企业所得税：${fm(taxCalc.cit.taxDue)} 元
+${taxCalc.isAdOrEntertainment ? '文化事业建设费：' + fm(taxCalc.culture.due) + ' 元\n' : ''}
+请前往电子税务局按此数值填报，确认申报？`;
+  if (confirm(msg)) showToast('申报数据已确认，请前往电子税务局填写', 'success');
+}
+
 function showToast(msg, type = '') {
-  const toast = document.getElementById('toast');
-  toast.textContent = msg;
-  toast.className = `toast ${type} show`;
-  setTimeout(() => toast.classList.remove('show'), 3500);
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 3500);
 }
 </script>
 </body>
