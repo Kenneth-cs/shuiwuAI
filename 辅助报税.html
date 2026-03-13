@@ -489,84 +489,254 @@ function loadTaxData() {
   const raw = sessionStorage.getItem('taxData');
   if (raw) { try { return JSON.parse(raw); } catch(e) {} }
   return {
-    revenue: { total: 50000, taxable_1_percent: 29702.97, taxable_3_percent: 0, tax_free: 20000 },
-    profit_info: { total_profit: 27800, total_cost: 22200 },
-    company_status: { employee_count: 5, asset_total_myr: 200, industry_type: 'tech' },
+    revenue: {
+      total: 50000,
+      taxable_1_percent: 29702.97,
+      taxable_3_percent: 0,
+      tax_free: 20000,
+      // 新增：更多征收率场景
+      taxable_5_percent: 0,           // 5%征收率（不动产租赁）
+      used_fixed_assets: 0,          // 销售使用过的固定资产
+      export_sales: 0,               // 出口销售额
+      has_export_license: false,   // 是否有出口资质
+    },
+    profit_info: {
+      total_profit: 27800,
+      total_cost: 22200,
+      // 新增：更详细的费用明细
+      sales_expense: 0,              // 销售费用
+      manage_expense: 0,             // 管理费用
+      rd_expense: 0,                 // 研发费用（可加计扣除）
+      finance_expense: 0,          // 财务费用
+      government_subsidy: 0,         // 政府补助收入
+      nonbusiness_income: 0,       // 营业外收入
+      nonbusiness_expense: 0,      // 营业外支出
+    },
+    // 新增：企业所得税调整项
+    cit_adjustments: {
+      specific_business_income: 0,   // 特定业务（房地产预售等）
+      tax_exempt_income: 0,          // 免税收入（国债利息等）
+      rd_extra_deduction: 0,         // 研发费用加计扣除额
+      asset_acceleration_deduction: 0, // 资产加速折旧调减额
+      loss_compensate: 0,          // 弥补以前年度亏损
+    },
+    // 新增：文化事业建设费减除项目
+    culture_deductions: {
+      opening_balance: 0,            // 减除项目期初余额
+      current_occurrence: 0,         // 本期发生额
+      actual_deduction: 0,         // 本期实际减除额
+    },
+    company_status: {
+      employee_count: 5,
+      asset_total_myr: 200,
+      industry_type: 'tech',
+      is_high_tech: false,          // 是否高新技术企业
+      is_rd_center: false,          // 是否研发中心
+    },
     companyInfo: { name: '上海某某科技有限公司', taxId: '91310115MA1XXXXXX', period: '2026-03', tax_type: 'small' },
   };
 }
 
-// ===== 核心税务计算引擎 =====
+// ===== 核心税务计算引擎（v2.0 - 完整版）=====
 function calculateTaxes(data) {
-  const rev = data.revenue;
-  const profit = data.profit_info;
-  const status = data.company_status;
+  const rev = data.revenue || {};
+  const profit = data.profit_info || {};
+  const status = data.company_status || {};
+  const adj = data.cit_adjustments || {};
+  const culDed = data.culture_deductions || {};
   const info = data.companyInfo || {};
   const period = info.period || (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; })();
 
-  // 增值税
-  const vat1pct = rev.taxable_1_percent * 0.01;
-  const vat3pct = (rev.taxable_3_percent || 0) * 0.03;
-  const totalTaxableSales = rev.taxable_1_percent + (rev.taxable_3_percent || 0);
+  // ==================== 1. 增值税计算（完整版）====================
+  const vat1pct = (rev.taxable_1_percent || 0) * 0.01;        // 1%征收率
+  const vat3pct = (rev.taxable_3_percent || 0) * 0.03;        // 3%征收率
+  const vat5pct = (rev.taxable_5_percent || 0) * 0.05;        // 【新增】5%征收率（不动产租赁）
+  const usedAssetSales = rev.used_fixed_assets || 0;
+  // 【新增】销售使用过的固定资产：3%减按2%征收，减征1%
+  const usedAssetVatFull = usedAssetSales * 0.03;              // 全额3%
+  const usedAssetVatDue = usedAssetSales * 0.02;               // 实缴2%
+  const usedAssetReduction = usedAssetSales * 0.01;            // 减征1%
+
+  // 【新增】出口退免税处理
+  const exportSales = rev.export_sales || 0;
+  const hasExportLicense = rev.has_export_license || false;
+  const exportVat = hasExportLicense ? 0 : (exportSales * 0.01); // 有资质免税，无资质征税
+
+  const totalTaxableSales = (rev.taxable_1_percent || 0) + (rev.taxable_3_percent || 0) +
+                            (rev.taxable_5_percent || 0) + usedAssetSales + exportSales;
   const totalSales = totalTaxableSales + (rev.tax_free || 0);
-  const isVatExempt = totalSales <= 100000;
-  const vatDue = isVatExempt ? 0 : (vat1pct + vat3pct);
+  const isVatExempt = totalSales <= 100000;                     // 免税判定：月销售额≤10万
 
-  // 附加税费（六税两费减征50%）
-  const urbanBuild = vatDue * 0.07;
-  const eduSurcharge = vatDue * 0.03;
-  const localEdu = vatDue * 0.02;
-  const halfUrban = urbanBuild * 0.5;
-  const halfEdu = eduSurcharge * 0.5;
-  const halfLocal = localEdu * 0.5;
-  const finalUrban = urbanBuild - halfUrban;
-  const finalEdu = eduSurcharge - halfEdu;
-  const finalLocal = localEdu - halfLocal;
+  // 应纳增值税合计
+  let vatDue = 0;
+  if (!isVatExempt) {
+    vatDue = vat1pct + vat3pct + vat5pct + usedAssetVatDue + exportVat;
+  }
 
-  // 企业所得税
-  const realProfit = profit.total_profit;
+  // ==================== 2. 附加税费（六税两费减征50%）====================
+  const urbanBuildFull = vatDue * 0.07;                        // 城建税7%
+  const eduSurchargeFull = vatDue * 0.03;                      // 教育费附加3%
+  const localEduFull = vatDue * 0.02;                        // 地方教育附加2%
+
+  // 小规模纳税人减征50%
+  const urbanBuild = urbanBuildFull * 0.5;
+  const eduSurcharge = eduSurchargeFull * 0.5;
+  const localEdu = localEduFull * 0.5;
+
+  // ==================== 3. 企业所得税（完整版）====================
+  const realProfit = profit.total_profit || 0;
   const totalCost = profit.total_cost || (rev.total - realProfit);
-  const isSmallMicro = status.employee_count <= 300 && status.asset_total_myr <= 5000 && realProfit <= 3000000;
-  const citRate = 0.25;
-  const actualCitRate = isSmallMicro ? 0.05 : 0.25;
-  const citDue = realProfit > 0 ? realProfit * actualCitRate : 0;
-  const citReduction = isSmallMicro && realProfit > 0 ? realProfit * (0.25 - actualCitRate) : 0;
 
-  // 文化事业建设费
+  // 【新增】详细的费用分项
+  const salesExpense = profit.sales_expense || 0;
+  const manageExpense = profit.manage_expense || 0;
+  const rdExpense = profit.rd_expense || 0;
+  const financeExpense = profit.finance_expense || 0;
+
+  // 【新增】营业外收支
+  const nonbusinessIncome = profit.nonbusiness_income || profit.government_subsidy || 0;
+  const nonbusinessExpense = profit.nonbusiness_expense || 0;
+
+  // 【新增】企业所得税调整项
+  const specificBusiness = adj.specific_business_income || 0;   // 特定业务（房地产预售）
+  const taxExemptIncome = adj.tax_exempt_income || 0;         // 免税收入（国债利息等）
+  const lossCompensate = adj.loss_compensate || 0;          // 弥补以前年度亏损
+
+  // 【新增】研发费用加计扣除（100%加计）
+  const rdExtraDeduction = rdExpense * 1.0;                   // 加计100%
+
+  // 【新增】资产加速折旧调减
+  const assetAccDeduction = adj.asset_acceleration_deduction || 0;
+
+  // 应纳税所得额调整计算
+  let taxableIncome = realProfit;
+  taxableIncome += specificBusiness;                            // 加：特定业务
+  taxableIncome -= taxExemptIncome;                          // 减：免税收入
+  taxableIncome -= assetAccDeduction;                        // 减：加速折旧调减
+  taxableIncome -= rdExtraDeduction;                         // 减：研发加计扣除
+  taxableIncome -= lossCompensate;                           // 减：弥补亏损
+  if (taxableIncome < 0) taxableIncome = 0;
+
+  // 小型微利企业判定（三条件同时满足）
+  const isSmallMicro = (status.employee_count || 0) <= 300 &&
+                       (status.asset_total_myr || 0) <= 5000 &&
+                       realProfit <= 3000000;
+
+  // 【新增】高新技术企业判定
+  const isHighTech = status.is_high_tech || false;
+
+  // 确定适用税率
+  let actualCitRate = 0.25;                                   // 默认25%
+  if (isSmallMicro) {
+    actualCitRate = 0.05;                                     // 小微：实际5%（25%×20%）
+  } else if (isHighTech) {
+    actualCitRate = 0.15;                                     // 高新：15%
+  }
+
+  const citRate = 0.25;                                       // 法定税率始终25%
+  const citDue = taxableIncome * actualCitRate;
+  const citReduction = (taxableIncome * citRate) - citDue;    // 减免额
+
+  // ==================== 4. 文化事业建设费（完整版）====================
   const isAdOrEntertainment = ['ad', 'entertainment'].includes(status.industry_type);
-  const cultureDue = isAdOrEntertainment ? totalTaxableSales * 0.03 : 0;
+
+  // 【新增】减除项目计算
+  const dedOpening = culDed.opening_balance || 0;              // 期初余额
+  const dedOccurrence = culDed.current_occurrence || 0;        // 本期发生额
+  const dedActual = culDed.actual_deduction || 0;              // 本期实际减除额
+  const dedClosing = dedOpening + dedOccurrence - dedActual;     // 期末余额
+
+  // 计费销售额 = 应征收入 - 减除额
+  const cultureTaxableSales = Math.max(0, (isAdOrEntertainment ? totalTaxableSales : 0) - dedActual);
+  const cultureDue = cultureTaxableSales * 0.03;
 
   // 本年累计倍数
   const month = parseInt((period || '').split('-')[1] || '1');
   const quarterMonth = ((month - 1) % 3) + 1;
 
+  // ==================== 5. 财务报表计算（更完整）====================
+  // 营业利润 = 营业收入 - 成本 - 税金 - 销售费用 - 管理费用 - 财务费用
+  const operatingProfit = (rev.total || 0) - totalCost - (vatDue * 0.12) -
+                          salesExpense - manageExpense - financeExpense;
+
+  // 利润总额 = 营业利润 + 营业外收入 - 营业外支出
+  const profitBeforeTax = operatingProfit + nonbusinessIncome - nonbusinessExpense;
+
+  // 净利润 = 利润总额 - 所得税
+  const netProfit = profitBeforeTax - citDue;
+
   return {
-    period, isVatExempt, isSmallMicro, isAdOrEntertainment,
+    period, isVatExempt, isSmallMicro, isHighTech, isAdOrEntertainment,
     vat: {
-      taxable1pct: r(rev.taxable_1_percent),
+      // 基础销售额
+      taxable1pct: r(rev.taxable_1_percent || 0),
       taxable3pct: r(rev.taxable_3_percent || 0),
+      taxable5pct: r(rev.taxable_5_percent || 0),                // 【新增】5%征收率
       taxFree: r(rev.tax_free || 0),
       totalTaxable: r(totalTaxableSales),
       totalSales: r(totalSales),
-      vatDue: r(vatDue), vatDue1pct: r(vat1pct), vatDue3pct: r(vat3pct),
-      urbanBuild: r(urbanBuild), eduSurcharge: r(eduSurcharge), localEdu: r(localEdu),
-      halfUrban: r(halfUrban), halfEdu: r(halfEdu), halfLocal: r(halfLocal),
-      finalUrban: r(finalUrban), finalEdu: r(finalEdu), finalLocal: r(finalLocal),
-      surchargeTotal: r(finalUrban + finalEdu + finalLocal),
+
+      // 各税率应纳税额
+      vatDue: r(vatDue),
+      vatDue1pct: r(vat1pct),
+      vatDue3pct: r(vat3pct),
+      vatDue5pct: r(vat5pct),                                    // 【新增】
+      vatDueUsedAsset: r(usedAssetVatDue),                       // 【新增】固定资产销售实缴
+      vatDueExport: r(exportVat),                              // 【新增】出口
+
+      // 减征额
+      usedAssetReduction: r(usedAssetReduction),                 // 【新增】固定资产减征额
+
+      // 附加税费
+      urbanBuild: r(urbanBuild),
+      eduSurcharge: r(eduSurcharge),
+      localEdu: r(localEdu),
+      surchargeTotal: r(urbanBuild + eduSurcharge + localEdu),
+
       ytdMult: quarterMonth,
       freeTaxAmount: r(isVatExempt ? vatDue : 0),
       smallMicroFree: r(isVatExempt ? (rev.tax_free || 0) : 0),
     },
     cit: {
-      revenue: r(rev.total || 0), totalCost: r(totalCost),
+      revenue: r(rev.total || 0),
+      totalCost: r(totalCost),
+      salesExpense: r(salesExpense),                            // 【新增】
+      manageExpense: r(manageExpense),                         // 【新增】
+      rdExpense: r(rdExpense),                                  // 【新增】
+      financeExpense: r(financeExpense),                       // 【新增】
       taxSurcharge: r(vatDue * 0.12),
-      realProfit: r(realProfit), taxDue: r(citDue),
-      taxRate: citRate, actualRate: actualCitRate,
-      reduction: r(citReduction), isSmallMicro,
+
+      // 调整项
+      specificBusiness: r(specificBusiness),                   // 【新增】特定业务
+      taxExemptIncome: r(taxExemptIncome),                     // 【新增】免税收入
+      rdExtraDeduction: r(rdExtraDeduction),                   // 【新增】研发加计扣除
+      assetAccDeduction: r(assetAccDeduction),                 // 【新增】加速折旧调减
+      lossCompensate: r(lossCompensate),                       // 【新增】弥补亏损
+
+      // 利润相关
+      operatingProfit: r(operatingProfit),                       // 【新增】营业利润
+      nonbusinessIncome: r(nonbusinessIncome),                 // 【新增】营业外收入
+      nonbusinessExpense: r(nonbusinessExpense),               // 【新增】营业外支出
+      realProfit: r(profitBeforeTax),                          // 利润总额
+      taxableIncome: r(taxableIncome),                         // 【新增】应纳税所得额
+
+      taxDue: r(citDue),
+      taxRate: citRate,
+      actualRate: actualCitRate,
+      reduction: r(citReduction),
+      isSmallMicro, isHighTech,
+      netProfit: r(netProfit),                                  // 【新增】净利润
     },
     culture: {
-      taxableSales: isAdOrEntertainment ? r(totalTaxableSales) : 0,
-      rate: 0.03, due: r(cultureDue),
+      // 【新增】减除项目明细
+      dedOpening: r(dedOpening),
+      dedOccurrence: r(dedOccurrence),
+      dedActual: r(dedActual),
+      dedClosing: r(dedClosing),
+
+      taxableSales: r(cultureTaxableSales),
+      rate: 0.03,
+      due: r(cultureDue),
     },
     status: { ...status },
     totalCost: r(totalCost),
@@ -615,52 +785,81 @@ function updateMeta() {
     `${name} · ${p} · 绿色高亮数值由 AI 根据您的财务数据自动填入，请核对后前往税务局填写`;
 }
 
-// ===== 增值税（小规模纳税人）完整主表 =====
+// ===== 增值税（小规模纳税人）完整主表 v2.0（含5%征收率、固定资产、出口）=====
 function renderVAT() {
   const c = taxCalc.vat;
   const ytd = c.ytdMult;
-  const isTech = !taxCalc.isAdOrEntertainment;
+  const has5Pct = c.taxable5pct > 0;                      // 【新增】是否有5%征收率业务
+  const hasUsedAsset = rawData.revenue?.used_fixed_assets > 0;  // 【新增】是否有固定资产销售
+  const hasExport = rawData.revenue?.export_sales > 0;     // 【新增】是否有出口
 
-  // 完整主表25行+附加税费，按货物及劳务(g) / 服务不动产(s) 分栏
-  // 科技/贸易公司：收入计入"服务"列；若有货物则计入"货物"列
-  const g = 0;  // 货物及劳务（demo 中默认无货物）
-  const s = c.taxable3pct; // 3%征收率 - 服务
+  // 分栏数据准备（货物及劳务 vs 服务不动产）
+  const g = 0;                                            // 货物及劳务（默认无）
+  const s3 = c.taxable3pct;                              // 3%征收率
+  const s5 = c.taxable5pct;                              // 【新增】5%征收率
+  const sUsed = rawData.revenue?.used_fixed_assets || 0;   // 【新增】固定资产
+  const sExport = rawData.revenue?.export_sales || 0;      // 【新增】出口
 
   const rows = [
     { cat: '一、计税依据' },
-    { no: 1,  item: '（一）应征增值税不含税销售额（3%征收率）', g: 0, s: c.taxable3pct, ai: !!c.taxable3pct },
+    // 3%征收率
+    { no: 1,  item: '（一）应征增值税不含税销售额（3%征收率）', g: 0, s: s3, ai: s3 > 0 },
     { no: 2,  item: '    增值税专用发票不含税销售额', g: 0, s: 0 },
-    { no: 3,  item: '    其他增值税发票不含税销售额', g: 0, s: c.taxable1pct, ai: !!c.taxable1pct, guide: '1%征收率开具的普通发票填此行' },
-    { no: 4,  item: '（二）应征增值税不含税销售额（5%征收率）', g: null, s: 0, gna: true },
-    { no: 5,  item: '    增值税专用发票不含税销售额', g: null, s: 0, gna: true },
-    { no: 6,  item: '    其他增值税发票不含税销售额', g: null, s: 0, gna: true },
-    { no: 7,  item: '（三）销售使用过的固定资产不含税销售额', g: 0, s: null, sna: true },
-    { no: 8,  item: '    其中：其他增值税发票不含税销售额', g: 0, s: null, sna: true },
-    { no: 9,  item: '（四）免税销售额', g: 0, s: c.taxFree, ai: !!c.taxFree, guide: '免税收入填此行' },
-    { no: 10, item: '    其中：小微企业免税销售额', g: 0, s: c.smallMicroFree, ai: !!c.smallMicroFree },
+    { no: 3,  item: '    其他增值税发票不含税销售额', g: 0, s: c.taxable1pct, ai: c.taxable1pct > 0, guide: '1%征收率开具的普通发票' },
+
+    // 【新增】5%征收率（不动产租赁等）
+    { no: 4,  item: '（二）应征增值税不含税销售额（5%征收率）', g: 0, s: s5, ai: has5Pct, guide: has5Pct ? '不动产租赁等适用5%征收率' : '' },
+    { no: 5,  item: '    增值税专用发票不含税销售额', g: 0, s: 0 },
+    { no: 6,  item: '    其他增值税发票不含税销售额', g: 0, s: 0 },
+
+    // 【更新】销售使用过的固定资产
+    { no: 7,  item: '（三）销售使用过的固定资产不含税销售额', g: sUsed, s: null, sna: true, ai: hasUsedAsset, guide: hasUsedAsset ? '3%减按2%征收，减征1%' : '' },
+    { no: 8,  item: '    其中：其他增值税发票不含税销售额', g: sUsed, s: null, sna: true, ai: hasUsedAsset },
+
+    // 免税销售额
+    { no: 9,  item: '（四）免税销售额', g: 0, s: c.taxFree, ai: c.taxFree > 0, guide: '月销售额≤10万免征' },
+    { no: 10, item: '    其中：小微企业免税销售额', g: 0, s: c.smallMicroFree, ai: taxCalc.isVatExempt && c.smallMicroFree > 0 },
     { no: 11, item: '          未达起征点销售额', g: 0, s: 0 },
-    { no: 12, item: '          其他免税销售额', g: 0, s: c.taxFree > 0 && !taxCalc.isVatExempt ? c.taxFree : 0 },
-    { no: 13, item: '（五）出口免税销售额', g: 0, s: 0 },
-    { no: 14, item: '    其中：其他增值税发票不含税销售额', g: 0, s: 0 },
+    { no: 12, item: '          其他免税销售额', g: 0, s: (!taxCalc.isVatExempt && c.taxFree > 0) ? c.taxFree : 0 },
+
+    // 【更新】出口免税
+    { no: 13, item: '（五）出口免税销售额', g: sExport, s: null, sna: true, ai: hasExport, guide: hasExport ? '出口退（免）税销售额' : '' },
+    { no: 14, item: '    其中：其他增值税发票不含税销售额', g: sExport, s: null, sna: true, ai: hasExport },
+
     { cat: '二、税款计算' },
-    { no: 15, item: '本期应纳税额', g: 0, s: r(c.vatDue), ai: true, guide: '应征销售额 × 征收率' },
-    { no: 16, item: '本期应纳税额减征额', g: 0, s: 0 },
-    { no: 17, item: '本期免税额', g: 0, s: c.freeTaxAmount, ai: !!c.freeTaxAmount, isExempt: taxCalc.isVatExempt },
+    // 【更新】应纳税额明细
+    { no: 15, item: '本期应纳税额', g: r(c.vatDue), s: r(c.vatDue), gna: true, ai: c.vatDue > 0 || hasUsedAsset || has5Pct,
+      guide: `3%部分:${fm(c.vatDue3pct)}${has5Pct ? ` + 5%部分:${fm(c.vatDue5pct)}` : ''}${hasUsedAsset ? ` + 固定资产(2%):${fm(c.vatDueUsedAsset)}` : ''}` },
+
+    // 【更新】减征额（含固定资产减征）
+    { no: 16, item: '本期应纳税额减征额', g: r(c.usedAssetReduction), s: r(c.usedAssetReduction), gna: true,
+      ai: c.usedAssetReduction > 0, guide: c.usedAssetReduction > 0 ? '销售固定资产减征1%' : '' },
+
+    { no: 17, item: '本期免税额', g: 0, s: c.freeTaxAmount, ai: c.freeTaxAmount > 0, isExempt: taxCalc.isVatExempt },
     { no: 18, item: '    其中：小微企业免税额', g: 0, s: taxCalc.isVatExempt ? c.freeTaxAmount : 0, ai: taxCalc.isVatExempt },
     { no: 19, item: '          未达起征点免税额', g: 0, s: 0 },
-    { no: 20, item: '应纳税额合计（15-16）', g: 0, s: r(c.vatDue), ai: true, isSub: true, guide: '15行-16行' },
+
+    { no: 20, item: '应纳税额合计（15-16）', g: r(c.vatDue), s: r(c.vatDue), gna: true,
+      ai: true, isSub: true, guide: '本期应纳税额 - 减征额' },
+
     { no: 21, item: '本期预缴税额', g: 0, s: 0, ytdNa: true },
-    { no: 22, item: '本期应补（退）税额（20-21）', g: 0, s: r(c.vatDue), ai: true, isSub: true, ytdNa: true, guide: '本期实际缴纳增值税' },
-    { cat: '三、附加税费' },
-    { no: 23, item: '城市维护建设税本期应补（退）税额', g: 0, s: r(c.finalUrban), ai: !!c.vatDue, guide: `增值税${fm(c.vatDue)}×7%=${fm(c.urbanBuild)}，减征50%=${fm(c.halfUrban)}` },
-    { no: 24, item: '教育费附加本期应补（退）费额', g: 0, s: r(c.finalEdu), ai: !!c.vatDue, guide: `增值税${fm(c.vatDue)}×3%=${fm(c.eduSurcharge)}，减征50%=${fm(c.halfEdu)}` },
-    { no: 25, item: '地方教育附加本期应补（退）费额', g: 0, s: r(c.finalLocal), ai: !!c.vatDue, guide: `增值税${fm(c.vatDue)}×2%=${fm(c.localEdu)}，减征50%=${fm(c.halfLocal)}` },
+    { no: 22, item: '本期应补（退）税额（20-21）', g: r(c.vatDue), s: r(c.vatDue), gna: true,
+      ai: true, isSub: true, ytdNa: true, guide: '本期实际应缴增值税' },
+
+    { cat: '三、附加税费（六税两费减征50%）' },
+    { no: 23, item: '城市维护建设税本期应补（退）税额', g: 0, s: r(c.finalUrban),
+      ai: c.vatDue > 0, guide: `基数${fm(c.vatDue)}×7%×50%=${fm(c.finalUrban)}` },
+    { no: 24, item: '教育费附加本期应补（退）费额', g: 0, s: r(c.finalEdu),
+      ai: c.vatDue > 0, guide: `基数${fm(c.vatDue)}×3%×50%=${fm(c.finalEdu)}` },
+    { no: 25, item: '地方教育附加本期应补（退）费额', g: 0, s: r(c.finalLocal),
+      ai: c.vatDue > 0, guide: `基数${fm(c.vatDue)}×2%×50%=${fm(c.finalLocal)}` },
   ];
 
   document.getElementById('vat-tbody').innerHTML = rows.map(row => {
     if (row.cat) return `<tr class="row-category"><td colspan="6">${row.cat}</td></tr>`;
 
-    const cls = [row.ai ? 'row-ai' : '', row.isSub ? 'row-subtotal' : '', row.isExempt ? 'row-exempt' : '', (!row.ai && row.g === 0 && row.s === 0) ? 'row-zero' : ''].filter(Boolean).join(' ');
+    const cls = [row.ai ? 'row-ai' : '', row.isSub ? 'row-subtotal' : '', row.isExempt ? 'row-exempt' : '',
+                (!row.ai && row.g === 0 && row.s === 0) ? 'row-zero' : ''].filter(Boolean).join(' ');
 
     const gVal = row.gna ? '<td class="td-na">--</td>' : aiCell(row.g, row.ai, row.guide);
     const sVal = row.sna ? '<td class="td-na">--</td>' : aiCell(row.s, row.ai, row.guide);
@@ -675,24 +874,30 @@ function renderVAT() {
   }).join('');
 }
 
-// ===== 企业所得税 A200000 完整申报表 =====
+// ===== 企业所得税 A200000 完整申报表 v2.0（含完整调整项）=====
 function renderCIT() {
   const c = taxCalc.cit;
   const st = taxCalc.status;
   const info = rawData.companyInfo || {};
 
-  // 优惠及附报事项信息
+  // 【更新】优惠及附报事项信息（含高新企业）
   document.getElementById('cit-info').innerHTML = `
     <div class="ci-row"><span class="ci-label">从业人数（季度平均值）：</span><span class="ci-value">${st.employee_count || 0} 人</span></div>
     <div class="ci-row"><span class="ci-label">资产总额（万元）：</span><span class="ci-value">${st.asset_total_myr || 0} 万元</span></div>
     <div class="ci-row"><span class="ci-label">国家限制或禁止行业：</span><span class="ci-value">☑ 否</span></div>
     <div class="ci-row"><span class="ci-label">小型微利企业：</span><span class="ci-value green">${c.isSmallMicro ? '☑ 是（适用5%优惠税率）' : '☐ 否'}</span></div>
+    ${c.isHighTech ? '<div class="ci-row"><span class="ci-label">高新技术企业：</span><span class="ci-value green">☑ 是（适用15%税率）</span></div>' : ''}
   `;
 
-  // 完整行次1-40
+  // 完整行次1-40（含新增计算项）
   const taxSurcharge = r(taxCalc.vat.finalUrban + taxCalc.vat.finalEdu + taxCalc.vat.finalLocal);
-  const profitBeforeTax = c.realProfit;
-  const operatingProfit = profitBeforeTax; // 简化：营业利润≈利润总额
+
+  // 判断各调整项是否有值
+  const hasSpecificBiz = c.specificBusiness > 0;
+  const hasAssetAcc = c.assetAccDeduction > 0;
+  const hasRdExtra = c.rdExtraDeduction > 0;
+  const hasTaxExempt = c.taxExemptIncome > 0;
+  const hasLossComp = c.lossCompensate > 0;
 
   const rows = [
     { no: '1',    item: '营业收入', val: c.revenue, ai: true, guide: '本期含税收入总额' },
@@ -700,11 +905,14 @@ function renderCIT() {
     { no: '1.2',  item: '　其中：委托出口收入', val: 0, sub: true },
     { no: '1.3',  item: '　其中：出口代理费收入', val: 0, sub: true },
     { no: '2',    item: '减：营业成本', val: c.totalCost, ai: true, guide: '本期营业总成本' },
-    { no: '3',    item: '减：税金及附加', val: taxSurcharge, ai: true, guide: '城建税+教育费附加+地方教育附加' },
-    { no: '4',    item: '减：销售费用', val: 0 },
-    { no: '5',    item: '减：管理费用', val: 0 },
-    { no: '6',    item: '减：研发费用', val: 0 },
-    { no: '7',    item: '减：财务费用', val: 0 },
+    { no: '3',    item: '减：税金及附加', val: taxSurcharge, ai: true, guide: '城建税+教育费附加+地方教育附加（已减征50%）' },
+
+    // 【更新】费用明细（含研发）
+    { no: '4',    item: '减：销售费用', val: c.salesExpense, ai: c.salesExpense > 0 },
+    { no: '5',    item: '减：管理费用', val: c.manageExpense, ai: c.manageExpense > 0 },
+    { no: '6',    item: '减：研发费用', val: c.rdExpense, ai: c.rdExpense > 0, guide: c.rdExpense > 0 ? `可加计扣除${fm(c.rdExtraDeduction)}元` : '' },
+    { no: '7',    item: '减：财务费用', val: c.financeExpense, ai: c.financeExpense > 0 },
+
     { no: '8',    item: '加：其他收益', val: 0 },
     { no: '9',    item: '加：投资收益（损失以"-"号填列）', val: 0 },
     { no: '9.1',  item: '　其中：股权投资确认的处置收益', val: 0, sub: true },
@@ -714,26 +922,61 @@ function renderCIT() {
     { no: '12',   item: '加：信用减值损失', val: 0 },
     { no: '13',   item: '加：资产减值损失', val: 0 },
     { no: '14',   item: '加：资产处置收益', val: 0 },
-    { no: '15',   item: '营业利润（亏损以"-"号填列）', val: operatingProfit, ai: true, isSub: true, guide: '1-2-3-4-5-6-7+8+9+10+11+12+13+14' },
-    { no: '16',   item: '加：营业外收入', val: 0 },
-    { no: '17',   item: '减：营业外支出', val: 0 },
-    { no: '18',   item: '利润总额（15+16-17）', val: profitBeforeTax, ai: true, isSub: true, guide: '营业利润+营业外收入-营业外支出' },
-    { no: '19',   item: '加：特定业务计算的应纳税所得额', val: 0 },
-    { no: '19.1', item: '　其中：销售未完工产品的收入', val: 0, sub: true },
+
+    // 【更新】营业利润（使用实际计算的营业利润）
+    { no: '15',   item: '营业利润（亏损以"-"号填列）', val: c.operatingProfit, ai: true, isSub: true,
+      guide: `营业收入-成本-税金-销售费用-管理费用${c.rdExpense > 0 ? '-研发费用' : ''}-财务费用` },
+
+    // 【更新】营业外收支（使用实际数据）
+    { no: '16',   item: '加：营业外收入', val: c.nonbusinessIncome, ai: c.nonbusinessIncome > 0, guide: c.nonbusinessIncome > 0 ? '含政府补助等' : '' },
+    { no: '17',   item: '减：营业外支出', val: c.nonbusinessExpense, ai: c.nonbusinessExpense > 0 },
+    { no: '18',   item: '利润总额（15+16-17）', val: c.realProfit, ai: true, isSub: true, guide: '营业利润+营业外收入-营业外支出' },
+
+    // 【更新】特定业务（房地产等）
+    { no: '19',   item: '加：特定业务计算的应纳税所得额', val: c.specificBusiness, ai: hasSpecificBiz,
+      guide: hasSpecificBiz ? '房地产预售等特定业务调整' : '' },
+    { no: '19.1', item: '　其中：销售未完工产品的收入', val: c.specificBusiness, ai: hasSpecificBiz, sub: true },
+
     { no: '20',   item: '减：不征税收入', val: 0 },
-    { no: '21',   item: '减：资产加速折旧、摊销（扣除）调减额', val: 0 },
-    { no: '22',   item: '减：免税收入、减计收入、加计扣除', val: 0 },
+
+    // 【更新】资产加速折旧调减
+    { no: '21',   item: '减：资产加速折旧、摊销（扣除）调减额', val: c.assetAccDeduction, ai: hasAssetAcc,
+      guide: hasAssetAcc ? '固定资产加速折旧调减额（需填A201020表）' : '' },
+
+    // 【更新】免税收入、加计扣除（含研发）
+    { no: '22',   item: '减：免税收入、减计收入、加计扣除', val: c.taxExemptIncome + c.rdExtraDeduction,
+      ai: hasTaxExempt || hasRdExtra,
+      guide: hasRdExtra ? `研发费用加计扣除${fm(c.rdExtraDeduction)}元${hasTaxExempt ? '+免税收入' : ''}` : (hasTaxExempt ? '免税收入' : '') },
+
     { no: '23',   item: '减：所得减免', val: 0 },
-    { no: '24',   item: '减：弥补以前年度亏损', val: 0 },
-    { no: '25',   item: '实际利润额（18+19-20-21-22-23-24）', val: r(profitBeforeTax > 0 ? profitBeforeTax : 0), ai: true, isSub: true, guide: '利润总额调整后的应纳税所得额' },
+
+    // 【更新】弥补亏损
+    { no: '24',   item: '减：弥补以前年度亏损', val: c.lossCompensate, ai: hasLossComp,
+      guide: hasLossComp ? '弥补以前年度亏损（不超过5年）' : '' },
+
+    // 【更新】实际利润额（使用实际应纳税所得额）
+    { no: '25',   item: '实际利润额（18+19-20-21-22-23-24）', val: c.taxableIncome, ai: true, isSub: true,
+      guide: `利润总额调整后应纳税所得额` },
+
     { no: '26',   item: '税率（25%）', val: '25%', isRate: true },
-    { no: '27',   item: '应纳所得税额（25×26）', val: r(profitBeforeTax > 0 ? profitBeforeTax * 0.25 : 0), ai: true, guide: '实际利润额 × 25%' },
-    { no: '28',   item: '减：减免所得税额', val: c.reduction, ai: !!c.reduction },
-    { no: '28.1', item: `　其中：符合条件的小型微利企业减免企业所得税`, val: c.reduction, ai: !!c.reduction, sub: true, guide: c.isSmallMicro ? '小微优惠：25%→5%实际税率，减免差额' : '' },
+
+    { no: '27',   item: '应纳所得税额（25×26）', val: r(c.taxableIncome * 0.25), ai: true,
+      guide: `${fm(c.taxableIncome)} × 25% = ${fm(r(c.taxableIncome * 0.25))}` },
+
+    // 【更新】减免税明细
+    { no: '28',   item: '减：减免所得税额', val: c.reduction, ai: c.reduction > 0,
+      guide: c.isSmallMicro ? '小微优惠减免20%' : (c.isHighTech ? '高新优惠减免10%' : '') },
+    { no: '28.1', item: `　其中：符合条件的小型微利企业减免企业所得税`, val: c.isSmallMicro ? c.reduction : 0,
+      ai: c.isSmallMicro, sub: true, guide: c.isSmallMicro ? '25%→5%实际税率' : '' },
+    { no: '28.2', item: `　其中：国家需要重点扶持的高新技术企业减免`, val: c.isHighTech ? c.reduction : 0,
+      ai: c.isHighTech, sub: true, guide: c.isHighTech ? '25%→15%税率' : '' },
+
     { no: '29',   item: '减：抵免所得税额', val: 0 },
     { no: '30',   item: '减：本年累计已预缴所得税额', val: 0 },
     { no: '31',   item: '减：特定业务预缴（征）所得税额', val: 0 },
-    { no: '32',   item: '本期应补（退）所得税额（27-28-29-30-31）', val: c.taxDue, ai: true, isSub: true, guide: '本期实际应缴企业所得税' },
+    { no: '32',   item: '本期应补（退）所得税额（27-28-29-30-31）', val: c.taxDue, ai: true, isSub: true,
+      guide: `实际应缴：${fm(c.taxableIncome)} × ${(c.actualRate * 100).toFixed(0)}% = ${fm(c.taxDue)}` },
+
     { cat: '── 民族自治地区减免 ──' },
     { no: '39',   item: '减：民族自治地区企业所得税地方分享部分（☑无）', val: 0 },
     { no: '40',   item: '实际应补（退）所得税额', val: c.taxDue, ai: true, isSub: true, guide: '最终实际缴纳金额' },
@@ -752,7 +995,7 @@ function renderCIT() {
   }).join('');
 }
 
-// ===== 文化事业建设费完整申报表 =====
+// ===== 文化事业建设费完整申报表 v2.0（含减除项目明细）=====
 function renderCulture() {
   const c = taxCalc.culture;
   const isApplicable = taxCalc.isAdOrEntertainment;
@@ -767,28 +1010,51 @@ function renderCulture() {
     return;
   }
 
+  // 【新增】判断是否有减除项目
+  const hasDeduction = c.dedOpening > 0 || c.dedOccurrence > 0 || c.dedActual > 0;
+
   const rows = [
-    { cat: '计费收入' },
-    { no: 1, item: '应征收入', val: c.taxableSales, ytd: c.taxableSales, ai: true, guide: '广告/娱乐服务应税收入' },
+    { cat: '一、计费收入' },
+    { no: 1, item: '应征收入', val: c.taxableSales, ytd: c.taxableSales, ai: true,
+      guide: `广告/娱乐服务应税收入${hasDeduction ? '（减除前）' : ''}` },
     { no: 2, item: '免征收入', val: 0, ytd: 0 },
-    { cat: '费额计算' },
-    { no: 3, item: '减除项目期初金额', val: 0, ytdNa: true },
-    { no: 4, item: '减除项目本期发生额', val: 0, ytd: 0 },
-    { no: 5, item: '应征收入减除额', val: 0, ytd: 0 },
+
+    { cat: '二、费额计算' },
+    // 【更新】减除项目明细
+    { no: 3, item: '减除项目期初金额', val: c.dedOpening, ytdNa: true,
+      ai: c.dedOpening > 0, guide: c.dedOpening > 0 ? '上期结转的减除项目余额' : '' },
+    { no: 4, item: '减除项目本期发生额', val: c.dedOccurrence, ytd: c.dedOccurrence,
+      ai: c.dedOccurrence > 0, guide: c.dedOccurrence > 0 ? '本期新增的减除项目金额（如广告发布成本）' : '' },
+    { no: 5, item: '应征收入减除额', val: c.dedActual, ytd: c.dedActual,
+      ai: c.dedActual > 0, guide: c.dedActual > 0 ? `本期实际减除额${c.dedActual > c.dedOpening + c.dedOccurrence ? '（不超过期初+发生）' : ''}` : '' },
     { no: 6, item: '免征收入减除额', val: 0, ytd: 0 },
-    { no: 7, item: '减除项目期末余额（3+4-5-6）', val: 0, ytd: 0 },
-    { no: 8, item: '计费销售额（1-5）', val: c.taxableSales, ytd: c.taxableSales, ai: true, isSub: true, guide: '应征收入 - 减除额' },
+
+    // 【更新】期末余额计算
+    { no: 7, item: '减除项目期末余额（3+4-5-6）', val: c.dedClosing, ytd: c.dedClosing,
+      ai: hasDeduction, isSub: true,
+      guide: hasDeduction ? `${fm(c.dedOpening)} + ${fm(c.dedOccurrence)} - ${fm(c.dedActual)} = ${fm(c.dedClosing)}（结转下期）` : '' },
+
+    // 【更新】计费销售额（扣除减除额后）
+    { no: 8, item: '计费销售额（1-5）', val: c.taxableSales, ytd: c.taxableSales,
+      ai: true, isSub: true,
+      guide: hasDeduction ? `应征收入${fm(c.taxableSales + c.dedActual)} - 减除额${fm(c.dedActual)} = ${fm(c.taxableSales)}` : '应征收入（无减除）' },
+
     { no: 9, item: '费率', val: '3%', ytd: null, isRate: true, ytdNa: true },
-    { cat: '费额缴纳' },
-    { no: 10, item: '应缴费额（8×9）', val: c.due, ytd: c.due, ai: true, guide: `${fm(c.taxableSales)} × 3% = ${fm(c.due)}` },
+
+    { cat: '三、费额缴纳' },
+    { no: 10, item: '应缴费额（8×9）', val: c.due, ytd: c.due,
+      ai: true, isSub: true,
+      guide: `${fm(c.taxableSales)} × 3% = ${fm(c.due)}` },
     { no: 11, item: '期初未缴费额（多缴为负）', val: 0, ytdNa: true },
     { no: 12, item: '本期已缴费额（13+14+15）', val: 0, ytd: 0 },
     { no: 13, item: '　其中：本期预缴费额', val: 0, ytd: 0, sub: true },
     { no: 14, item: '　其中：本期缴纳上期费额', val: 0, ytd: 0, sub: true },
     { no: 15, item: '　其中：本期缴纳欠费额', val: 0, ytd: 0, sub: true },
-    { no: 16, item: '期末未缴费额（多缴为负）', val: c.due, ytd: c.due, ai: true },
+    { no: 16, item: '期末未缴费额（多缴为负）', val: c.due, ytd: c.due, ai: true,
+      guide: hasDeduction ? '应缴费额（已扣减除项目）' : '' },
     { no: 17, item: '　其中：欠缴费额（≥0）', val: 0, ytdNa: true },
-    { no: 18, item: '本期应补（退）费额', val: c.due, ytdNa: true, ai: true, isSub: true, guide: '本期实际应缴文化事业建设费' },
+    { no: 18, item: '本期应补（退）费额', val: c.due, ytdNa: true, ai: true, isSub: true,
+      guide: `本期实际应缴文化事业建设费${hasDeduction ? '（已扣减除项目）' : ''}` },
     { no: 19, item: '本期检查已补缴费额', val: 0, ytd: 0 },
   ];
 
@@ -805,19 +1071,31 @@ function renderCulture() {
       ${row.ytdNa ? '<td class="td-na">--</td>' : (row.ai ? `<td class="td-value">${ytdStr}</td>` : `<td class="td-value">${ytdStr}</td>`)}
     </tr>`;
   }).join('');
+
+  // 【新增】显示减除项目说明
+  if (hasDeduction) {
+    document.getElementById('culture-note').textContent =
+      `💡 本期已扣减退除项目金额 ${fm(c.dedActual)} 元，计费销售额按扣除后金额 ${fm(c.taxableSales)} 元计算`;
+  } else {
+    document.getElementById('culture-note').textContent =
+      '💡 广告服务业可扣除支付给其他广告公司或广告发布者的含税广告发布费作为减除项目';
+  }
 }
 
-// ===== 财务报表（利润表+资产负债表） =====
+// ===== 财务报表 v2.0（利润表+资产负债表，含完整费用明细）=====
 function renderFinance() {
   const rev = rawData.revenue || {};
   const profit = rawData.profit_info || {};
   const c = taxCalc.cit;
   const vat = taxCalc.vat;
 
-  // 利润表（会小企02表）
+  // 利润表（会小企02表）- 使用实际计算的费用明细
   const taxSurcharge = r(vat.finalUrban + vat.finalEdu + vat.finalLocal);
-  const operatingProfit = c.realProfit;
-  const netProfit = r(operatingProfit - c.taxDue);
+
+  // 【更新】使用实际计算的利润数据
+  const operatingProfit = c.operatingProfit;           // 实际计算的营业利润
+  const profitBeforeTax = c.realProfit;               // 利润总额
+  const netProfit = c.netProfit;                       // 净利润
 
   const profitRows = [
     { item: '一、营业收入', no: 1, val: c.revenue, ai: true },
@@ -825,47 +1103,77 @@ function renderFinance() {
     { item: '　　营业税金及附加', no: 3, val: taxSurcharge, ai: true },
     { item: '　　　其中：城市维护建设税', no: 6, val: vat.finalUrban, ai: true, sub: true },
     { item: '　　　　　　教育费附加、地方教育附加', no: 10, val: r(vat.finalEdu + vat.finalLocal), ai: true, sub: true },
-    { item: '　　销售费用', no: 11, val: 0 },
-    { item: '　　管理费用', no: 14, val: 0 },
-    { item: '　　　其中：研究费用', no: 17, val: 0, sub: true },
-    { item: '　　财务费用', no: 18, val: 0 },
-    { item: '二、营业利润（亏损以"-"号填列）', no: 22, val: operatingProfit, ai: true, isSub: true },
-    { item: '加：营业外收入', no: 23, val: 0 },
-    { item: '减：营业外支出', no: 25, val: 0 },
-    { item: '三、利润总额（亏损总额以"-"号填列）', no: 31, val: operatingProfit, ai: true, isSub: true },
-    { item: '减：所得税费用', no: 32, val: c.taxDue, ai: true },
-    { item: '四、净利润（净亏损以"-"号填列）', no: 33, val: netProfit, ai: true, isSub: true },
+
+    // 【更新】费用明细使用实际数据
+    { item: '　　销售费用', no: 11, val: c.salesExpense, ai: c.salesExpense > 0 },
+    { item: '　　管理费用', no: 14, val: c.manageExpense, ai: c.manageExpense > 0 },
+    { item: '　　　其中：研究费用', no: 17, val: c.rdExpense, ai: c.rdExpense > 0,
+      sub: true, guide: c.rdExpense > 0 ? `可加计扣除${fm(c.rdExtraDeduction)}元` : '' },
+    { item: '　　财务费用', no: 18, val: c.financeExpense, ai: c.financeExpense > 0 },
+
+    // 【更新】营业利润
+    { item: '二、营业利润（亏损以"-"号填列）', no: 22, val: operatingProfit,
+      ai: true, isSub: true,
+      guide: `营业收入${fm(c.revenue)}-成本${fm(c.totalCost)}-税金${fm(taxSurcharge)}${c.salesExpense > 0 ? '-销售费用' : ''}${c.manageExpense > 0 ? '-管理费用' : ''}${c.rdExpense > 0 ? '-研发费用' : ''}${c.financeExpense > 0 ? '-财务费用' : ''}` },
+
+    // 【更新】营业外收支
+    { item: '加：营业外收入', no: 23, val: c.nonbusinessIncome,
+      ai: c.nonbusinessIncome > 0, guide: c.nonbusinessIncome > 0 ? '含政府补助等' : '' },
+    { item: '减：营业外支出', no: 25, val: c.nonbusinessExpense, ai: c.nonbusinessExpense > 0 },
+
+    // 【更新】利润总额
+    { item: '三、利润总额（亏损总额以"-"号填列）', no: 31, val: profitBeforeTax,
+      ai: true, isSub: true, guide: '营业利润+营业外收入-营业外支出' },
+
+    { item: '减：所得税费用', no: 32, val: c.taxDue, ai: true,
+      guide: `${fm(c.taxableIncome)} × ${(c.actualRate * 100).toFixed(0)}% = ${fm(c.taxDue)}` },
+
+    // 【更新】净利润
+    { item: '四、净利润（净亏损以"-"号填列）', no: 33, val: netProfit, ai: true, isSub: true,
+      guide: `利润总额${fm(profitBeforeTax)} - 所得税${fm(c.taxDue)} = ${fm(netProfit)}` },
   ];
 
   document.getElementById('profit-tbody').innerHTML = profitRows.map(row => {
     const cls = [row.ai ? 'row-ai' : '', row.isSub ? 'row-subtotal' : '', (!row.ai && row.val === 0) ? 'row-zero' : ''].filter(Boolean).join(' ');
+    const ytdVal = r(row.val * vat.ytdMult);
     return `<tr class="${cls}">
       <td class="td-item">${row.item}</td>
       <td class="td-no">${row.no}</td>
       <td class="td-value">${row.ai ? `<span class="td-value-indicator"><span class="ai-dot"></span>${fm(row.val)}</span>` : fm(row.val)}</td>
-      <td class="td-value">${fm(r(row.val * vat.ytdMult))}</td>
+      <td class="td-value">${fm(ytdVal)}</td>
     </tr>`;
   }).join('');
 
   // 资产负债表（会小企01表）- 左右分栏
   const assetMyr = (rawData.company_status?.asset_total_myr || 200) * 10000;
-  const netP = netProfit > 0 ? netProfit : 0;
+  const netP = Math.max(netProfit, 0);               // 未分配利润（不能为负）
+  const totalTaxDue = r((taxCalc.vat?.vatDue || 0) + c.taxDue);
 
   const balanceRows = [
     { a: '流动资产：', an: '', ae: '', aa: '', l: '流动负债：', ln: '', le: '', la: '', isHeader: true },
     { a: '货币资金', an: 1, ae: fm(r(assetMyr * 0.3)), aa: 0, l: '短期借款', ln: 31, le: 0, la: 0 },
     { a: '应收账款', an: 4, ae: fm(r(assetMyr * 0.15)), aa: 0, l: '应付账款', ln: 33, le: 0, la: 0 },
     { a: '存货', an: 9, ae: fm(r(assetMyr * 0.1)), aa: 0, l: '应付职工薪酬', ln: 35, le: 0, la: 0 },
-    { a: '其他流动资产', an: 14, ae: 0, aa: 0, l: '应交税费', ln: 36, le: fm(r(c.taxDue + taxCalc.vat.vatDue)), la: 0, aiR: true },
-    { a: '流动资产合计', an: 15, ae: fm(r(assetMyr * 0.55)), aa: 0, l: '流动负债合计', ln: 41, le: fm(r(c.taxDue + taxCalc.vat.vatDue)), la: 0, isSub: true },
+    { a: '其他流动资产', an: 14, ae: 0, aa: 0, l: '应交税费', ln: 36,
+      le: fm(totalTaxDue), la: 0, aiR: totalTaxDue > 0,
+      guide: `增值税${fm(taxCalc.vat?.vatDue || 0)}+所得税${fm(c.taxDue)}` },
+    { a: '流动资产合计', an: 15, ae: fm(r(assetMyr * 0.55)), aa: 0,
+      l: '流动负债合计', ln: 41, le: fm(totalTaxDue), la: 0, isSub: true },
+
     { a: '非流动资产：', an: '', ae: '', aa: '', l: '非流动负债：', ln: '', le: '', la: '', isHeader: true },
-    { a: '固定资产账面价值', an: 20, ae: fm(r(assetMyr * 0.4)), aa: 0, l: '长期借款', ln: 42, le: 0, la: 0 },
-    { a: '无形资产', an: 25, ae: fm(r(assetMyr * 0.05)), aa: 0, l: '非流动负债合计', ln: 46, le: 0, la: 0 },
-    { a: '非流动资产合计', an: 29, ae: fm(r(assetMyr * 0.45)), aa: 0, l: '负债合计', ln: 47, le: fm(r(c.taxDue + taxCalc.vat.vatDue)), la: 0, isSub: true },
+    { a: '固定资产账面价值', an: 20, ae: fm(r(assetMyr * 0.4)), aa: 0,
+      l: '长期借款', ln: 42, le: 0, la: 0 },
+    { a: '无形资产', an: 25, ae: fm(r(assetMyr * 0.05)), aa: 0,
+      l: '非流动负债合计', ln: 46, le: 0, la: 0 },
+    { a: '非流动资产合计', an: 29, ae: fm(r(assetMyr * 0.45)), aa: 0,
+      l: '负债合计', ln: 47, le: fm(totalTaxDue), la: 0, isSub: true },
+
     { a: '', an: '', ae: '', aa: '', l: '所有者权益：', ln: '', le: '', la: '', isHeader: true },
     { a: '', an: '', ae: '', aa: '', l: '实收资本（或股本）', ln: 48, le: fm(r(assetMyr * 0.5)), la: 0 },
-    { a: '', an: '', ae: '', aa: '', l: '未分配利润', ln: 51, le: fm(netP), la: 0, aiR: true },
-    { a: '资产总计', an: 30, ae: fm(assetMyr), aa: 0, l: '负债和所有者权益总计', ln: 53, le: fm(assetMyr), la: 0, isSub: true },
+    { a: '', an: '', ae: '', aa: '', l: '未分配利润', ln: 51, le: fm(netP), la: 0,
+      aiR: netP > 0, guide: netP > 0 ? `本期净利润${fm(netP)}元转入` : '' },
+    { a: '资产总计', an: 30, ae: fm(assetMyr), aa: 0,
+      l: '负债和所有者权益总计', ln: 53, le: fm(assetMyr), la: 0, isSub: true },
   ];
 
   document.getElementById('balance-tbody').innerHTML = balanceRows.map(row => {
@@ -884,7 +1192,7 @@ function renderFinance() {
   }).join('');
 }
 
-// ===== AI 助手面板 =====
+// ===== AI 助手面板 v2.0（展示完整计算逻辑）=====
 function renderAIPanel() {
   const c = taxCalc;
   const v = c.vat;
@@ -893,27 +1201,108 @@ function renderAIPanel() {
   document.getElementById('ai-step-title').textContent = '计税依据确认';
 
   let lines = [];
+
+  // 1. 增值税计算逻辑
   if (c.isVatExempt) {
-    lines.push(`本期总销售额 <strong>${fm(v.totalSales)}</strong> 元，未超过10万元免税额度`);
-    lines.push(`已自动应用<strong>增值税免税政策</strong>，应纳增值税 = <strong>0.00</strong> 元`);
+    lines.push(`✓ 本期总销售额 <strong>${fm(v.totalSales)}</strong> 元 ≤ 10万元，享受增值税免税政策`);
+    lines.push(`  → 应纳增值税 = <strong>0.00</strong> 元`);
   } else {
-    if (v.taxable1pct > 0) lines.push(`1%税率不含税销售额 <strong>${fm(v.taxable1pct)}</strong> × 1% = ${fm(v.vatDue1pct)} 元`);
-    if (v.taxable3pct > 0) lines.push(`3%税率不含税销售额 <strong>${fm(v.taxable3pct)}</strong> × 3% = ${fm(v.vatDue3pct)} 元`);
-    lines.push(`应纳增值税合计：<strong>${fm(v.vatDue)}</strong> 元`);
-    lines.push(`附加税费（含六税两费减征50%）：<strong>${fm(v.surchargeTotal)}</strong> 元`);
+    lines.push(`增值税计算：`);
+    let vatDetails = [];
+    if (v.taxable1pct > 0) vatDetails.push(`1%税率部分：${fm(v.taxable1pct)}×1%=${fm(v.vatDue1pct)}元`);
+    if (v.taxable3pct > 0) vatDetails.push(`3%税率部分：${fm(v.taxable3pct)}×3%=${fm(v.vatDue3pct)}元`);
+    if (v.taxable5pct > 0) vatDetails.push(`【5%税率】不动产等：${fm(v.taxable5pct)}×5%=${fm(v.vatDue5pct)}元`);
+    if (v.vatDueUsedAsset > 0) vatDetails.push(`【固定资产】3%减按2%：${fm(v.vatDueUsedAsset)}元（减征1%=${fm(v.usedAssetReduction)}元）`);
+    if (v.vatDueExport > 0) vatDetails.push(`【出口】${fm(v.vatDueExport)}元`);
+    lines.push(`  ${vatDetails.join('；')}`);
+    lines.push(`  → 应纳增值税合计：<strong>${fm(v.vatDue)}</strong> 元`);
   }
-  lines.push(`企业所得税：利润 <strong>${fm(cit.realProfit)}</strong> × <strong>${(cit.actualRate*100).toFixed(0)}%</strong> = <strong>${fm(cit.taxDue)}</strong> 元`);
 
-  document.getElementById('ai-logic-text').innerHTML = '<strong>AI 逻辑解析：</strong>' + lines.join('；<br/>') + '。';
+  // 2. 附加税费计算
+  lines.push(`附加税费（六税两费减征50%）：`);
+  lines.push(`  城建税：${fm(v.vatDue)}×7%×50% = <strong>${fm(v.finalUrban)}</strong> 元`);
+  lines.push(`  教育费附加：${fm(v.vatDue)}×3%×50% = <strong>${fm(v.finalEdu)}</strong> 元`);
+  lines.push(`  地方教育附加：${fm(v.vatDue)}×2%×50% = <strong>${fm(v.finalLocal)}</strong> 元`);
+  lines.push(`  → 附加税费合计：<strong>${fm(v.surchargeTotal)}</strong> 元`);
 
+  // 3. 企业所得税计算
+  lines.push(`企业所得税计算：`);
+
+  // 展示费用明细
+  if (cit.salesExpense > 0 || cit.manageExpense > 0 || cit.rdExpense > 0 || cit.financeExpense > 0) {
+    let expenseParts = [`营业成本${fm(cit.totalCost)}`];
+    if (cit.salesExpense > 0) expenseParts.push(`销售费用${fm(cit.salesExpense)}`);
+    if (cit.manageExpense > 0) expenseParts.push(`管理费用${fm(cit.manageExpense)}`);
+    if (cit.rdExpense > 0) expenseParts.push(`【研发费】${fm(cit.rdExpense)}（可加计扣除${fm(cit.rdExtraDeduction)}）`);
+    if (cit.financeExpense > 0) expenseParts.push(`财务费用${fm(cit.financeExpense)}`);
+    lines.push(`  成本费用：${expenseParts.join('+')}`);
+  }
+
+  // 营业利润
+  lines.push(`  营业利润 = ${fm(cit.revenue)} - ${fm(cit.totalCost)} - ${fm(cit.taxSurcharge)}${cit.salesExpense > 0 ? ` - ${fm(cit.salesExpense)}` : ''}${cit.manageExpense > 0 ? ` - ${fm(cit.manageExpense)}` : ''}${cit.rdExpense > 0 ? ` - ${fm(cit.rdExpense)}` : ''}${cit.financeExpense > 0 ? ` - ${fm(cit.financeExpense)}` : ''} = <strong>${fm(cit.operatingProfit)}</strong> 元`);
+
+  // 利润总额
+  if (cit.nonbusinessIncome > 0 || cit.nonbusinessExpense > 0) {
+    lines.push(`  利润总额 = ${fm(cit.operatingProfit)}${cit.nonbusinessIncome > 0 ? ` + ${fm(cit.nonbusinessIncome)}(营业外收入)` : ''}${cit.nonbusinessExpense > 0 ? ` - ${fm(cit.nonbusinessExpense)}(营业外支出)` : ''} = <strong>${fm(cit.realProfit)}</strong> 元`);
+  }
+
+  // 应纳税所得额调整
+  let adjParts = [];
+  if (cit.specificBusiness > 0) adjParts.push(`+特定业务${fm(cit.specificBusiness)}`);
+  if (cit.assetAccDeduction > 0) adjParts.push(`-加速折旧调减${fm(cit.assetAccDeduction)}`);
+  if (cit.taxExemptIncome > 0) adjParts.push(`-免税收入${fm(cit.taxExemptIncome)}`);
+  if (cit.rdExtraDeduction > 0) adjParts.push(`-【研发加计扣除】${fm(cit.rdExtraDeduction)}`);
+  if (cit.lossCompensate > 0) adjParts.push(`-弥补亏损${fm(cit.lossCompensate)}`);
+
+  if (adjParts.length > 0) {
+    lines.push(`  应纳税所得额调整：${fm(cit.realProfit)} ${adjParts.join(' ')} = <strong>${fm(cit.taxableIncome)}</strong> 元`);
+  }
+
+  // 税率和税额
+  let rateExplain = '';
+  if (cit.isSmallMicro) rateExplain = '（小微优惠：25%×20%=5%实际税率）';
+  else if (cit.isHighTech) rateExplain = '（高新优惠：15%税率）';
+  lines.push(`  应纳所得税 = ${fm(cit.taxableIncome)} × ${(cit.actualRate * 100).toFixed(0)}%${rateExplain} = <strong>${fm(cit.taxDue)}</strong> 元`);
+  if (cit.reduction > 0) {
+    lines.push(`  【节税】享受优惠减免：<strong>${fm(cit.reduction)}</strong> 元`);
+  }
+
+  // 4. 文化事业建设费
+  if (c.isAdOrEntertainment) {
+    lines.push(`文化事业建设费：`);
+    const cul = c.culture;
+    if (cul.dedActual > 0) {
+      lines.push(`  应征收入${fm(cul.taxableSales + cul.dedActual)} - 减除额${fm(cul.dedActual)} = 计费销售额<strong>${fm(cul.taxableSales)}</strong> 元`);
+    }
+    lines.push(`  应缴费额 = ${fm(cul.taxableSales)} × 3% = <strong>${fm(cul.due)}</strong> 元`);
+  }
+
+  document.getElementById('ai-logic-text').innerHTML = '<strong>AI 逻辑解析：</strong><br/>' + lines.join('<br/>');
+
+  // 校验清单
   const checks = [];
   checks.push({ icon: '✅', cls: 'pass', title: '申报校验通过', desc: `已核对开票数据与财务报表，${c.isVatExempt ? '本期免征增值税' : `应纳增值税 ${fm(v.vatDue)} 元`}` });
+
   if (cit.isSmallMicro) {
-    checks.push({ icon: '🎁', cls: 'pass', title: '小型微利企业优惠已应用', desc: `从业≤300人，资产≤5000万，适用5%优惠税率，节税 ${fm(cit.reduction)} 元` });
+    checks.push({ icon: '🎁', cls: 'pass', title: '小型微利企业优惠已应用', desc: `从业≤300人，资产≤5000万，利润≤300万，适用5%优惠税率，节税 ${fm(cit.reduction)} 元` });
   }
+  if (cit.isHighTech) {
+    checks.push({ icon: '🔬', cls: 'pass', title: '高新技术企业优惠已应用', desc: '适用15%优惠税率（法定25%）' });
+  }
+  if (cit.rdExpense > 0) {
+    checks.push({ icon: '💡', cls: 'pass', title: '研发费用加计扣除已应用', desc: `研发费用${fm(cit.rdExpense)}元，加计扣除${fm(cit.rdExtraDeduction)}元` });
+  }
+
   checks.push({ icon: '📋', cls: 'info', title: '六税两费减征已应用', desc: '小规模纳税人附加税费减征50%，已自动扣减' });
+
   if (c.isAdOrEntertainment) {
-    checks.push({ icon: '⚠️', cls: 'warn', title: '需缴纳文化事业建设费', desc: `广告/娱乐业收入需额外缴纳 ${fm(c.culture.due)} 元（费率3%）` });
+    const cul = c.culture;
+    checks.push({ icon: '⚠️', cls: 'warn', title: '文化事业建设费', desc: `广告/娱乐业${cul.dedActual > 0 ? '（已扣减退除项目）' : ''}应缴 ${fm(cul.due)} 元（费率3%）` });
+  }
+
+  // 新增：固定资产减征提示
+  if (v.usedAssetReduction > 0) {
+    checks.push({ icon: '🏭', cls: 'info', title: '固定资产销售优惠', desc: `销售使用过的固定资产减征1%，已节省 ${fm(v.usedAssetReduction)} 元` });
   }
 
   document.getElementById('check-list').innerHTML = checks.map(it => `
@@ -927,9 +1316,38 @@ function updateBenefitCard() {
   const card = document.getElementById('benefit-card');
   const text = document.getElementById('benefit-text');
   const msgs = [];
-  if (taxCalc.isVatExempt) msgs.push('根据《小规模纳税人增值税减免政策》，月销售额10万以下免征增值税。');
-  if (taxCalc.cit.isSmallMicro) msgs.push('符合小型微利企业条件（人数≤300、资产≤5000万、利润≤300万），企业所得税按5%实际税率计算。');
-  msgs.push('小规模纳税人"六税两费"减征50%政策已自动应用于附加税费计算。');
+
+  // 增值税优惠
+  if (taxCalc.isVatExempt) {
+    msgs.push('✓ <strong>增值税免税</strong>：根据《小规模纳税人增值税减免政策》，月销售额10万以下免征增值税。');
+  }
+
+  // 企业所得税优惠
+  if (taxCalc.cit.isSmallMicro) {
+    const reduction = taxCalc.cit.reduction;
+    msgs.push(`✓ <strong>小型微利企业优惠</strong>：从业人数≤300、资产总额≤5000万、年应纳税所得额≤300万，企业所得税按5%实际税率计算${reduction > 0 ? `，本期节税${fm(reduction)}元` : ''}。`);
+  } else if (taxCalc.cit.isHighTech) {
+    msgs.push('✓ <strong>高新技术企业优惠</strong>：适用15%企业所得税优惠税率（法定税率25%）。');
+  }
+
+  // 研发费用加计扣除
+  if (taxCalc.cit.rdExpense > 0) {
+    msgs.push(`✓ <strong>研发费用加计扣除</strong>：本期研发费用${fm(taxCalc.cit.rdExpense)}元，按100%加计扣除，额外扣减${fm(taxCalc.cit.rdExtraDeduction)}元。`);
+  }
+
+  // 固定资产减征
+  if (taxCalc.vat.usedAssetReduction > 0) {
+    msgs.push(`✓ <strong>固定资产销售优惠</strong>：销售使用过的固定资产按3%征收率减按2%征收，减征1%，节省${fm(taxCalc.vat.usedAssetReduction)}元。`);
+  }
+
+  // 六税两费减征
+  msgs.push('✓ <strong>六税两费减征</strong>：小规模纳税人城建税、教育费附加、地方教育附加、印花税、房产税、城镇土地使用税减征50%。');
+
+  // 文化事业建设费减除
+  if (taxCalc.isAdOrEntertainment && taxCalc.culture.dedActual > 0) {
+    msgs.push(`✓ <strong>文化事业建设费减除</strong>：已扣减广告发布成本${fm(taxCalc.culture.dedActual)}元，计费销售额按扣除后金额计算。`);
+  }
+
   text.innerHTML = msgs.join('<br/><br/>');
   card.style.display = msgs.length > 0 ? 'block' : 'none';
 }
