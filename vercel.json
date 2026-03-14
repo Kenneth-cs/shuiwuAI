@@ -3,6 +3,8 @@
   "buildCommand": null,
   "outputDirectory": ".",
   "routes": [
+    { "src": "/首页",         "dest": "/首页.html" },
+    { "src": "/财务看板",     "dest": "/财务看板.html" },
     { "src": "/申报工具箱",   "dest": "/申报工具箱.html" },
     { "src": "/辅助报税",     "dest": "/辅助报税.html" },
     { "src": "/",             "dest": "/index.html" }

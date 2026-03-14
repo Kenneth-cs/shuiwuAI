@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>首页 - 税悟 AI</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans CJK SC', sans-serif;
+      background: #F6F8F7; color: #0F172A; min-height: 100vh;
+    }
+
+    /* ===== 顶部导航 ===== */
+    .navbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: 64px; background: rgba(255,255,255,0.9);
+      border-bottom: 1px solid rgba(40,175,96,0.12); backdrop-filter: blur(8px);
+      display: flex; align-items: center; padding: 0 24px; justify-content: space-between;
+    }
+    .navbar-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .logo-icon { width: 38px; height: 38px; background: #28AF60; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: white; font-weight: 700; }
+    .logo-text h1 { font-size: 18px; font-weight: 700; color: #0F172A; }
+    .logo-text p { font-size: 10px; color: #28AF60; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; }
+    .navbar-right { display: flex; align-items: center; gap: 12px; }
+    .btn-icon { width: 36px; height: 36px; border-radius: 8px; border: none; cursor: pointer; background: rgba(40,175,96,0.1); color: #28AF60; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; background: #E2E8F0; border: 2px solid rgba(40,175,96,0.2); display: flex; align-items: center; justify-content: center; font-size: 13px; color: #475569; cursor: pointer; }
+
+    /* ===== 布局 ===== */
+    .layout { display: flex; min-height: 100vh; padding-top: 64px; }
+
+    /* ===== 侧边栏 ===== */
+    .sidebar {
+      width: 220px; flex-shrink: 0; background: white;
+      border-right: 1px solid rgba(40,175,96,0.08); padding: 24px 12px;
+      display: flex; flex-direction: column; gap: 6px;
+      position: fixed; top: 64px; bottom: 0; left: 0; overflow-y: auto;
+    }
+    .sidebar-card { padding: 16px; background: white; border-radius: 10px; border: 1px solid rgba(40,175,96,0.12); margin-bottom: 8px; }
+    .sidebar-card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .sidebar-avatar { width: 40px; height: 40px; background: rgba(40,175,96,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .sidebar-card-head h3 { font-size: 14px; font-weight: 700; }
+    .sidebar-card-head p { font-size: 11px; color: #64748B; }
+    .btn-consult { width: 100%; padding: 10px; background: #28AF60; color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500; color: #475569; transition: all 0.15s; text-decoration: none; }
+    .nav-item:hover { background: rgba(40,175,96,0.06); color: #28AF60; }
+    .nav-item.active { background: #E1F1E8; color: #28AF60; font-weight: 600; }
+    .nav-icon { font-size: 16px; }
+    .quick-entry { margin-top: auto; padding: 12px; background: #F1F5F9; border-radius: 8px; }
+    .quick-entry p { font-size: 11px; color: #64748B; margin-bottom: 8px; }
+    .quick-btns { display: flex; gap: 6px; }
+    .quick-btn { flex: 1; padding: 6px; background: white; border-radius: 4px; border: 1px solid #E2E8F0; font-size: 10px; text-align: center; cursor: pointer; color: #0F172A; }
+
+    /* ===== 主内容 ===== */
+    .main { margin-left: 220px; flex: 1; padding: 28px 28px 60px; display: flex; flex-direction: column; gap: 24px; }
+
+    /* ===== 搜索区 ===== */
+    .search-card {
+      background: rgba(40,175,96,0.05); border-radius: 16px;
+      border: 1px solid rgba(40,175,96,0.1); padding: 32px;
+    }
+    .search-card h2 { font-size: 22px; font-weight: 700; margin-bottom: 16px; }
+    .search-wrap { position: relative; max-width: 680px; }
+    .search-input {
+      width: 100%; padding: 16px 140px 16px 48px; border: none;
+      background: white; border-radius: 12px; font-size: 15px; color: #0F172A;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06); outline: none;
+      font-family: inherit;
+    }
+    .search-input::placeholder { color: #94A3B8; }
+    .search-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); font-size: 18px; color: #28AF60; pointer-events: none; }
+    .search-btn {
+      position: absolute; right: 8px; top: 8px; bottom: 8px;
+      padding: 0 20px; background: #28AF60; color: white; border: none;
+      border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer;
+    }
+    .search-tags { display: flex; align-items: center; gap: 12px; margin-top: 12px; font-size: 12px; flex-wrap: wrap; }
+    .search-tags .label { color: #64748B; }
+    .search-tag { color: #28AF60; cursor: pointer; }
+    .search-tag:hover { text-decoration: underline; }
+
+    /* ===== 办税全景地图 ===== */
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .section-title { display: flex; align-items: center; gap: 8px; font-size: 20px; font-weight: 700; }
+    .section-title::before { content: ''; display: block; width: 4px; height: 20px; background: #28AF60; border-radius: 2px; }
+    .section-more { color: #28AF60; font-size: 14px; font-weight: 500; text-decoration: none; cursor: pointer; }
+
+    .map-card { background: white; border-radius: 12px; padding: 32px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+    .map-steps { display: flex; align-items: center; gap: 0; }
+    .map-step { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 12px; position: relative; }
+    .map-step:not(:last-child)::after {
+      content: ''; position: absolute; right: 0; top: 24px;
+      width: 50%; height: 2px; background: #F1F5F9;
+    }
+    .map-step:not(:first-child)::before {
+      content: ''; position: absolute; left: 0; top: 24px;
+      width: 50%; height: 2px; background: #F1F5F9;
+    }
+    .map-dot {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: rgba(40,175,96,0.15); display: flex; align-items: center; justify-content: center;
+      font-size: 22px; z-index: 1;
+    }
+    .map-dot.active { background: #28AF60; box-shadow: 0 0 0 4px rgba(40,175,96,0.2); }
+    .map-dot.active span { filter: brightness(0) invert(1); }
+    .map-label { font-size: 14px; font-weight: 700; }
+    .map-sub { font-size: 10px; color: #64748B; text-align: center; }
+
+    /* ===== 政策 & 行业 ===== */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+
+    .policy-list { display: flex; flex-direction: column; gap: 12px; }
+    .policy-item {
+      background: white; border-radius: 12px; padding: 16px 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04); position: relative;
+      border-left: 4px solid #28AF60;
+    }
+    .policy-item.gray { border-left-color: #CBD5E1; }
+    .policy-badge {
+      display: inline-block; padding: 2px 8px; border-radius: 4px;
+      font-size: 10px; font-weight: 700; margin-bottom: 8px;
+    }
+    .policy-badge.green { background: rgba(40,175,96,0.1); color: #28AF60; }
+    .policy-badge.gray { background: #F1F5F9; color: #64748B; }
+    .policy-title { font-size: 14px; font-weight: 700; color: #0F172A; margin-bottom: 4px; line-height: 1.4; }
+    .policy-date { font-size: 12px; color: #64748B; }
+
+    .industry-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .industry-card {
+      background: white; border-radius: 12px; padding: 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04); text-align: center;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .industry-card:hover { box-shadow: 0 4px 16px rgba(40,175,96,0.12); transform: translateY(-2px); }
+    .industry-icon {
+      width: 48px; height: 48px; border-radius: 12px;
+      margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-size: 22px;
+    }
+    .industry-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+    .industry-desc { font-size: 10px; color: #64748B; }
+
+    @media (max-width: 1100px) { .two-col { grid-template-columns: 1fr; } }
+    @media (max-width: 900px) { .sidebar { display: none; } .main { margin-left: 0; } }
+  </style>
+</head>
+<body>
+
+<!-- 顶部导航 -->
+<nav class="navbar">
+  <a href="index.html" class="navbar-logo">
+    <div class="logo-icon">税</div>
+    <div class="logo-text"><h1>税悟 AI</h1><p>Intelligent Ledger</p></div>
+  </a>
+  <div class="navbar-right">
+    <button class="btn-icon">🔔</button>
+    <div class="avatar">王</div>
+  </div>
+</nav>
+
+<div class="layout">
+  <!-- 侧边栏 -->
+  <aside class="sidebar">
+    <div class="sidebar-card">
+      <div class="sidebar-card-head">
+        <div class="sidebar-avatar">🤖</div>
+        <div><h3>AI 智能助手</h3><p>24/7 在线为您答疑</p></div>
+      </div>
+      <button class="btn-consult">💬 发起在线咨询</button>
+    </div>
+    <a href="首页.html" class="nav-item active"><span class="nav-icon">🏠</span> 首页</a>
+    <a href="财务看板.html" class="nav-item"><span class="nav-icon">📈</span> 财务看板</a>
+    <a href="#" class="nav-item"><span class="nav-icon">🗺️</span> 办税全景地图</a>
+    <a href="申报工具箱.html" class="nav-item"><span class="nav-icon">📋</span> 申报工具箱</a>
+    <a href="辅助报税.html" class="nav-item"><span class="nav-icon">📊</span> 辅助报税</a>
+    <a href="#" class="nav-item"><span class="nav-icon">🏥</span> 财务健康诊断</a>
+    <a href="#" class="nav-item"><span class="nav-icon">⚙️</span> 个人设置</a>
+    <div class="quick-entry">
+      <p>常用入口</p>
+      <div class="quick-btns">
+        <div class="quick-btn">发票申领</div>
+        <div class="quick-btn">税收减免</div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- 智能税务搜索 -->
+    <div class="search-card">
+      <h2>智能税务搜索</h2>
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input class="search-input" placeholder="问问 AI 办税问题，例如：如何进行研发费用加计扣除？" />
+        <button class="search-btn">搜索</button>
+      </div>
+      <div class="search-tags">
+        <span class="label">热门搜索：</span>
+        <span class="search-tag">增值税申报</span>
+        <span class="search-tag">个税汇算清缴</span>
+        <span class="search-tag">高企认定政策</span>
+        <span class="search-tag">小微企业减免</span>
+        <span class="search-tag">研发加计扣除</span>
+      </div>
+    </div>
+
+    <!-- 办税全景地图 -->
+    <div>
+      <div class="section-header">
+        <div class="section-title">办税全景地图</div>
+        <span class="section-more">查看详情 →</span>
+      </div>
+      <div class="map-card">
+        <div class="map-steps">
+          <div class="map-step">
+            <div class="map-dot active"><span>🏢</span></div>
+            <div class="map-label">企业注册</div>
+            <div class="map-sub">税种登记、资质认定</div>
+          </div>
+          <div class="map-step">
+            <div class="map-dot"><span>📅</span></div>
+            <div class="map-label">日常经营</div>
+            <div class="map-sub">发票管理、纳税申报</div>
+          </div>
+          <div class="map-step">
+            <div class="map-dot"><span>🎁</span></div>
+            <div class="map-label">优惠享受</div>
+            <div class="map-sub">减税降费、退税办理</div>
+          </div>
+          <div class="map-step">
+            <div class="map-dot"><span>🔚</span></div>
+            <div class="map-label">简易注销</div>
+            <div class="map-sub">清税证明、清算报备</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 政策速递 + 行业攻略 -->
+    <div class="two-col">
+      <!-- 政策速递 -->
+      <div>
+        <div class="section-header">
+          <div class="section-title">政策速递</div>
+        </div>
+        <div class="policy-list">
+          <div class="policy-item">
+            <span class="policy-badge green">新规</span>
+            <div class="policy-title">关于2026年度小微企业所得税优惠政策的通知</div>
+            <div class="policy-date">2026-03-01</div>
+          </div>
+          <div class="policy-item gray">
+            <span class="policy-badge gray">解读</span>
+            <div class="policy-title">研发费用加计扣除申报指南（2026版）</div>
+            <div class="policy-date">发布时间：2026-02-18</div>
+          </div>
+          <div class="policy-item gray">
+            <span class="policy-badge gray">动态</span>
+            <div class="policy-title">电子发票全电平台操作流程优化公告</div>
+            <div class="policy-date">发布时间：2026-02-15</div>
+          </div>
+          <div class="policy-item gray">
+            <span class="policy-badge gray">解读</span>
+            <div class="policy-title">小规模纳税人月销售额10万免税政策延续</div>
+            <div class="policy-date">发布时间：2026-01-20</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 行业攻略 -->
+      <div>
+        <div class="section-header">
+          <div class="section-title">行业攻略</div>
+        </div>
+        <div class="industry-grid">
+          <div class="industry-card">
+            <div class="industry-icon" style="background:#DBEAFE;">💻</div>
+            <div class="industry-name">互联网科技</div>
+            <div class="industry-desc">高新补贴、人员个税</div>
+          </div>
+          <div class="industry-card">
+            <div class="industry-icon" style="background:#FFEDD5;">🛍️</div>
+            <div class="industry-name">零售贸易</div>
+            <div class="industry-desc">库存管理、进项抵扣</div>
+          </div>
+          <div class="industry-card">
+            <div class="industry-icon" style="background:#F3E8FF;">🏭</div>
+            <div class="industry-name">制造业</div>
+            <div class="industry-desc">设备折旧、能源补贴</div>
+          </div>
+          <div class="industry-card">
+            <div class="industry-icon" style="background:#D1FAE5;">🍽️</div>
+            <div class="industry-name">生活服务</div>
+            <div class="industry-desc">小规模税率、免征额</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+</body>
+</html>
